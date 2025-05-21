@@ -1,0 +1,224 @@
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { router } from 'expo-router';
+import theme from '@/constants/theme';
+import SearchInput from '@/components/SearchInput';
+import { taskers } from '@/mocks/taskers';
+
+// Mock conversations
+const mockConversations = [
+  {
+    id: '1',
+    taskerId: '1', // Rajesh Kumar
+    lastMessage: {
+      content: "I'll be there at 10 AM tomorrow",
+      timestamp: '2023-06-10T09:30:00Z',
+      read: true,
+    },
+  },
+  {
+    id: '2',
+    taskerId: '2', // Priya Singh
+    lastMessage: {
+      content: "Can you provide more details about the leaking tap?",
+      timestamp: '2023-06-09T14:15:00Z',
+      read: false,
+    },
+  },
+  {
+    id: '3',
+    taskerId: '3', // Amit Patel
+    lastMessage: {
+      content: "The fan installation is complete. Thank you!",
+      timestamp: '2023-06-08T16:45:00Z',
+      read: true,
+    },
+  },
+];
+
+export default function ChatsScreen() {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [conversations, setConversations] = useState(mockConversations);
+
+  const getTaskerById = (id: string) => {
+    return taskers.find(tasker => tasker.id === id);
+  };
+
+  const formatTime = (timestamp: string) => {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffInDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+    
+    if (diffInDays === 0) {
+      // Today, show time
+      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    } else if (diffInDays === 1) {
+      // Yesterday
+      return 'Yesterday';
+    } else if (diffInDays < 7) {
+      // Within a week, show day name
+      return date.toLocaleDateString([], { weekday: 'short' });
+    } else {
+      // More than a week, show date
+      return date.toLocaleDateString([], { day: 'numeric', month: 'short' });
+    }
+  };
+
+  const handleChatPress = (conversationId: string, taskerId: string) => {
+    router.push(`/chat/${taskerId}`);
+  };
+
+  const filteredConversations = conversations.filter(conversation => {
+    if (!searchQuery) return true;
+    
+    const tasker = getTaskerById(conversation.taskerId);
+    if (!tasker) return false;
+    
+    return tasker.name.toLowerCase().includes(searchQuery.toLowerCase());
+  });
+
+  return (
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <View style={styles.header}>
+        <Text style={styles.title}>Chats</Text>
+      </View>
+
+      <View style={styles.searchContainer}>
+        <SearchInput
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          placeholder="Search conversations..."
+        />
+      </View>
+
+      <FlatList
+        data={filteredConversations}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => {
+          const tasker = getTaskerById(item.taskerId);
+          if (!tasker) return null;
+          
+          return (
+            <TouchableOpacity
+              style={styles.conversationItem}
+              onPress={() => handleChatPress(item.id, item.taskerId)}
+              activeOpacity={0.7}
+            >
+              <Image
+                source={{ uri: tasker.avatar }}
+                style={styles.avatar}
+              />
+              {!item.lastMessage.read && <View style={styles.unreadBadge} />}
+              <View style={styles.conversationContent}>
+                <View style={styles.conversationHeader}>
+                  <Text style={styles.name}>{tasker.name}</Text>
+                  <Text style={styles.time}>{formatTime(item.lastMessage.timestamp)}</Text>
+                </View>
+                <Text
+                  style={[
+                    styles.message,
+                    !item.lastMessage.read && styles.unreadMessage,
+                  ]}
+                  numberOfLines={1}
+                >
+                  {item.lastMessage.content}
+                </Text>
+              </View>
+            </TouchableOpacity>
+          );
+        }}
+        ListEmptyComponent={
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyTitle}>No conversations yet</Text>
+            <Text style={styles.emptyText}>
+              Start chatting with taskers to discuss your tasks
+            </Text>
+          </View>
+        }
+      />
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: theme.colors.light.background,
+  },
+  header: {
+    paddingHorizontal: theme.spacing.l,
+    paddingTop: theme.spacing.l,
+    paddingBottom: theme.spacing.m,
+  },
+  title: {
+    ...theme.typography.h2,
+  },
+  searchContainer: {
+    paddingHorizontal: theme.spacing.l,
+    marginBottom: theme.spacing.l,
+  },
+  conversationItem: {
+    flexDirection: 'row',
+    padding: theme.spacing.m,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.light.border,
+    position: 'relative',
+  },
+  avatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginRight: theme.spacing.m,
+  },
+  unreadBadge: {
+    position: 'absolute',
+    top: 20,
+    left: 45,
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: theme.colors.light.primary,
+    borderWidth: 2,
+    borderColor: theme.colors.light.background,
+  },
+  conversationContent: {
+    flex: 1,
+  },
+  conversationHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  name: {
+    ...theme.typography.body,
+    fontWeight: '600',
+  },
+  time: {
+    ...theme.typography.caption,
+    color: theme.colors.light.subtext,
+  },
+  message: {
+    ...theme.typography.bodySmall,
+    color: theme.colors.light.subtext,
+  },
+  unreadMessage: {
+    color: theme.colors.light.text,
+    fontWeight: '500',
+  },
+  emptyContainer: {
+    alignItems: 'center',
+    padding: theme.spacing.xl,
+    marginTop: theme.spacing.xl,
+  },
+  emptyTitle: {
+    ...theme.typography.h3,
+    marginBottom: theme.spacing.s,
+  },
+  emptyText: {
+    ...theme.typography.body,
+    color: theme.colors.light.subtext,
+    textAlign: 'center',
+  },
+});
