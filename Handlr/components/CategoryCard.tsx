@@ -60,17 +60,17 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
     >
       {getCategoryIcon(
         category.icon,
-        // Use colors from context for selected icon color (white)
+        // Use common.white for selected icon color
         // Unselected icon color remains category.color (data-driven)
-        selected ? colors.white : category.color, 
+        selected ? originalTheme.colors.common.white : category.color, 
         24
       )}
       <Text
         style={[
           styles.name,
-          // Use colors from context for text color when unselected
-          // Selected text color remains white (or could be a contrast color to category.color if needed)
-          { color: selected ? colors.white : colors.text }, 
+          // Use common.white for selected text color
+          // Unselected text color uses theme-dependent colors.text
+          { color: selected ? originalTheme.colors.common.white : colors.text }, 
         ]}
         numberOfLines={1}
       >

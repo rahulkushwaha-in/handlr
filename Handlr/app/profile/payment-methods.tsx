@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react'; // Added useEffect
 import { 
   View, 
   Text, 
@@ -9,7 +9,7 @@ import {
   Alert,
   Modal
 } from 'react-native';
-import { router, Stack } from 'expo-router';
+import { router, Stack, useNavigation } from 'expo-router'; // Added useNavigation
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { 
   ChevronLeft, 
@@ -20,78 +20,61 @@ import {
   X,
   AlertCircle
 } from 'lucide-react-native';
-import theme from '@/constants/theme';
+import originalTheme from '@/constants/theme'; // Renamed
+import { useTheme } from '../../../context/ThemeContext'; // Added
 import Button from '@/components/Button';
 
-// Mock payment methods
+// Mock payment methods (data remains the same)
 const mockPaymentMethods = [
-  {
-    id: '1',
-    type: 'card',
-    name: 'HDFC Credit Card',
-    number: '•••• •••• •••• 4242',
-    expiry: '12/25',
-    isDefault: true,
-    icon: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/200px-Mastercard-logo.svg.png',
-  },
-  {
-    id: '2',
-    type: 'upi',
-    name: 'Google Pay',
-    number: 'user@okicici',
-    isDefault: false,
-    icon: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Google_Pay_Logo_%282020%29.svg/200px-Google_Pay_Logo_%282020%29.svg.png',
-  },
-  {
-    id: '3',
-    type: 'wallet',
-    name: 'Paytm Wallet',
-    number: '+91 98765 43210',
-    isDefault: false,
-    icon: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/Paytm_Logo_%28standalone%29.svg/200px-Paytm_Logo_%28standalone%29.svg.png',
-  },
+  { id: '1', type: 'card', name: 'HDFC Credit Card', number: '•••• •••• •••• 4242', expiry: '12/25', isDefault: true, icon: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/200px-Mastercard-logo.svg.png', },
+  { id: '2', type: 'upi', name: 'Google Pay', number: 'user@okicici', isDefault: false, icon: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Google_Pay_Logo_%282020%29.svg/200px-Google_Pay_Logo_%282020%29.svg.png', },
+  { id: '3', type: 'wallet', name: 'Paytm Wallet', number: '+91 98765 43210', isDefault: false, icon: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/Paytm_Logo_%28standalone%29.svg/200px-Paytm_Logo_%28standalone%29.svg.png', },
 ];
 
 export default function PaymentMethodsScreen() {
+  const { colors } = useTheme();
+  const navigation = useNavigation();
+  const styles = dynamicStyles(colors, originalTheme);
+
   const [paymentMethods, setPaymentMethods] = useState(mockPaymentMethods);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
 
+  useEffect(() => {
+    navigation.setOptions({
+      headerStyle: { backgroundColor: colors.background },
+      headerTitleStyle: { color: colors.text },
+      headerLeft: () => (
+        <TouchableOpacity 
+          style={styles.headerButton} // Layout only
+          onPress={() => router.back()}
+        >
+          <ChevronLeft size={24} color={colors.text} />
+        </TouchableOpacity>
+      ),
+    });
+  }, [navigation, colors]);
+
   const handleAddPaymentMethod = () => {
-    // In a real app, this would navigate to a screen to add a new payment method
-    Alert.alert(
-      "Add Payment Method",
-      "This would open a screen to add a new payment method in a real app."
-    );
+    Alert.alert("Add Payment Method", "This would open a screen to add a new payment method.");
   };
 
   const handleSetDefault = (id: string) => {
     setPaymentMethods(methods => 
-      methods.map(method => ({
-        ...method,
-        isDefault: method.id === id
-      }))
+      methods.map(method => ({ ...method, isDefault: method.id === id }))
     );
   };
 
   const handleDeleteConfirm = () => {
     if (selectedMethod) {
-      // Check if trying to delete default method
       const isDefault = paymentMethods.find(m => m.id === selectedMethod)?.isDefault;
-      
       if (isDefault) {
-        Alert.alert(
-          "Cannot Delete Default",
-          "Please set another payment method as default before deleting this one."
-        );
+        Alert.alert("Cannot Delete Default", "Please set another payment method as default first.");
         setShowDeleteModal(false);
         setSelectedMethod(null);
         return;
       }
-      
-      setPaymentMethods(methods => 
-        methods.filter(method => method.id !== selectedMethod)
-      );
+      setPaymentMethods(methods => methods.filter(method => method.id !== selectedMethod));
       setShowDeleteModal(false);
       setSelectedMethod(null);
     }
@@ -104,26 +87,14 @@ export default function PaymentMethodsScreen() {
 
   return (
     <>
-      <Stack.Screen 
-        options={{
-          title: 'Payment Methods',
-          headerLeft: () => (
-            <TouchableOpacity 
-              style={styles.headerButton}
-              onPress={() => router.back()}
-            >
-              <ChevronLeft size={24} color={theme.colors.light.text} />
-            </TouchableOpacity>
-          ),
-        }} 
-      />
+      {/* Stack.Screen options are now set dynamically via useEffect */}
       <SafeAreaView style={styles.container} edges={['bottom']}>
         <ScrollView showsVerticalScrollIndicator={false}>
           <View style={styles.addButtonContainer}>
             <Button
               title="Add Payment Method"
               onPress={handleAddPaymentMethod}
-              leftIcon={<Plus size={18} color={theme.colors.common.white} />}
+              leftIcon={<Plus size={18} color={originalTheme.colors.common.white} />} // Explicitly white icon
             />
           </View>
 
@@ -157,7 +128,7 @@ export default function PaymentMethodsScreen() {
                   <View style={styles.paymentMethodActions}>
                     {method.isDefault ? (
                       <View style={styles.defaultBadge}>
-                        <CheckCircle size={14} color={theme.colors.light.success} />
+                        <CheckCircle size={14} color={colors.success} />
                         <Text style={styles.defaultText}>Default</Text>
                       </View>
                     ) : (
@@ -172,7 +143,7 @@ export default function PaymentMethodsScreen() {
                       style={styles.deleteButton}
                       onPress={() => handleDelete(method.id)}
                     >
-                      <Trash2 size={18} color={theme.colors.light.error} />
+                      <Trash2 size={18} color={colors.error} />
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -180,7 +151,7 @@ export default function PaymentMethodsScreen() {
             </View>
           ) : (
             <View style={styles.emptyContainer}>
-              <CreditCard size={60} color={theme.colors.light.subtext} />
+              <CreditCard size={60} color={colors.subtext} />
               <Text style={styles.emptyTitle}>No Payment Methods</Text>
               <Text style={styles.emptyText}>
                 Add a payment method to easily pay for tasks
@@ -188,9 +159,9 @@ export default function PaymentMethodsScreen() {
             </View>
           )}
 
-          <View style={styles.securityNote}>
+          <View style={styles.securityNoteContainer}>
             <View style={styles.securityIcon}>
-              <AlertCircle size={20} color={theme.colors.light.primary} />
+              <AlertCircle size={20} color={colors.primary} />
             </View>
             <Text style={styles.securityText}>
               Your payment information is encrypted and stored securely. We use industry-standard security measures to protect your data.
@@ -199,7 +170,6 @@ export default function PaymentMethodsScreen() {
         </ScrollView>
       </SafeAreaView>
 
-      {/* Delete Confirmation Modal */}
       <Modal
         visible={showDeleteModal}
         transparent={true}
@@ -211,7 +181,7 @@ export default function PaymentMethodsScreen() {
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Delete Payment Method</Text>
               <TouchableOpacity onPress={() => setShowDeleteModal(false)}>
-                <X size={24} color={theme.colors.light.text} />
+                <X size={24} color={colors.text} />
               </TouchableOpacity>
             </View>
             <Text style={styles.modalText}>
@@ -227,9 +197,9 @@ export default function PaymentMethodsScreen() {
               <Button
                 title="Delete"
                 onPress={handleDeleteConfirm}
-                variant="primary"
+                variant="primary" // This will use primary bg, text should be white
                 style={[styles.modalButton, styles.deleteModalButton]}
-                textStyle={{ color: theme.colors.common.white }}
+                textStyle={{ color: originalTheme.colors.common.white }} // Explicitly white text
               />
             </View>
           </View>
@@ -239,178 +209,184 @@ export default function PaymentMethodsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.light.background,
-  },
-  headerButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  addButtonContainer: {
-    padding: theme.spacing.l,
-  },
-  sectionTitle: {
-    paddingHorizontal: theme.spacing.l,
-    marginBottom: theme.spacing.s,
-  },
-  sectionTitleText: {
-    ...theme.typography.bodySmall,
-    color: theme.colors.light.subtext,
-    fontWeight: '600',
-    textTransform: 'uppercase',
-  },
-  paymentMethodsContainer: {
-    backgroundColor: theme.colors.light.card,
-    borderRadius: theme.radius.l,
-    marginHorizontal: theme.spacing.l,
-    marginBottom: theme.spacing.l,
-    overflow: 'hidden',
-  },
-  paymentMethodItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: theme.spacing.l,
-  },
-  paymentMethodItemBorder: {
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.light.border,
-  },
-  paymentMethodLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  paymentMethodIcon: {
-    width: 40,
-    height: 40,
-    resizeMode: 'contain',
-    marginRight: theme.spacing.m,
-  },
-  paymentMethodInfo: {
-    flex: 1,
-  },
-  paymentMethodName: {
-    ...theme.typography.body,
-    fontWeight: '600',
-    marginBottom: 2,
-  },
-  paymentMethodNumber: {
-    ...theme.typography.bodySmall,
-    color: theme.colors.light.subtext,
-    marginBottom: 2,
-  },
-  paymentMethodExpiry: {
-    ...theme.typography.caption,
-    color: theme.colors.light.subtext,
-  },
-  paymentMethodActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  defaultBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: theme.colors.light.success + '20',
-    paddingHorizontal: theme.spacing.s,
-    paddingVertical: 4,
-    borderRadius: theme.radius.s,
-    marginRight: theme.spacing.s,
-  },
-  defaultText: {
-    ...theme.typography.caption,
-    color: theme.colors.light.success,
-    fontWeight: '600',
-    marginLeft: 4,
-  },
-  setDefaultButton: {
-    paddingHorizontal: theme.spacing.s,
-    paddingVertical: 4,
-    marginRight: theme.spacing.s,
-  },
-  setDefaultText: {
-    ...theme.typography.caption,
-    color: theme.colors.light.primary,
-    fontWeight: '600',
-  },
-  deleteButton: {
-    padding: theme.spacing.xs,
-  },
-  emptyContainer: {
-    alignItems: 'center',
-    padding: theme.spacing.xl,
-    backgroundColor: theme.colors.light.card,
-    borderRadius: theme.radius.l,
-    marginHorizontal: theme.spacing.l,
-    marginBottom: theme.spacing.l,
-  },
-  emptyTitle: {
-    ...theme.typography.h3,
-    marginTop: theme.spacing.m,
-    marginBottom: theme.spacing.s,
-  },
-  emptyText: {
-    ...theme.typography.body,
-    color: theme.colors.light.subtext,
-    textAlign: 'center',
-  },
-  securityNote: {
-    flexDirection: 'row',
-    backgroundColor: theme.colors.light.highlight,
-    borderRadius: theme.radius.l,
-    padding: theme.spacing.m,
-    marginHorizontal: theme.spacing.l,
-    marginBottom: theme.spacing.xxl,
-  },
-  securityIcon: {
-    marginRight: theme.spacing.m,
-  },
-  securityText: {
-    ...theme.typography.caption,
-    color: theme.colors.light.subtext,
-    flex: 1,
-    lineHeight: 18,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContainer: {
-    backgroundColor: theme.colors.light.background,
-    borderRadius: theme.radius.l,
-    width: '80%',
-    padding: theme.spacing.l,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: theme.spacing.m,
-  },
-  modalTitle: {
-    ...theme.typography.h3,
-  },
-  modalText: {
-    ...theme.typography.body,
-    color: theme.colors.light.subtext,
-    marginBottom: theme.spacing.l,
-  },
-  modalButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  modalButton: {
-    flex: 1,
-    marginHorizontal: theme.spacing.xs,
-  },
-  deleteModalButton: {
-    backgroundColor: theme.colors.light.error,
-  },
-});
+const dynamicStyles = (colors: ReturnType<typeof useTheme>['colors'], currentTheme: typeof originalTheme) => 
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    headerButton: { // Layout only
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    addButtonContainer: {
+      padding: currentTheme.spacing.l,
+    },
+    sectionTitle: {
+      paddingHorizontal: currentTheme.spacing.l,
+      marginBottom: currentTheme.spacing.s,
+    },
+    sectionTitleText: {
+      ...currentTheme.typography.bodySmall,
+      color: colors.subtext,
+      fontWeight: '600',
+      textTransform: 'uppercase',
+    },
+    paymentMethodsContainer: {
+      backgroundColor: colors.card,
+      borderRadius: currentTheme.radius.l,
+      marginHorizontal: currentTheme.spacing.l,
+      marginBottom: currentTheme.spacing.l,
+      overflow: 'hidden',
+    },
+    paymentMethodItem: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      padding: currentTheme.spacing.l,
+    },
+    paymentMethodItemBorder: { // Applied to paymentMethodItem
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+    },
+    paymentMethodLeft: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      flex: 1,
+    },
+    paymentMethodIcon: {
+      width: 40,
+      height: 40,
+      resizeMode: 'contain',
+      marginRight: currentTheme.spacing.m,
+    },
+    paymentMethodInfo: {
+      flex: 1,
+    },
+    paymentMethodName: {
+      ...currentTheme.typography.body,
+      fontWeight: '600',
+      color: colors.text, // Added
+      marginBottom: 2,
+    },
+    paymentMethodNumber: {
+      ...currentTheme.typography.bodySmall,
+      color: colors.subtext,
+      marginBottom: 2,
+    },
+    paymentMethodExpiry: {
+      ...currentTheme.typography.caption,
+      color: colors.subtext,
+    },
+    paymentMethodActions: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    defaultBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.success + '20', // Updated
+      paddingHorizontal: currentTheme.spacing.s,
+      paddingVertical: 4,
+      borderRadius: currentTheme.radius.s,
+      marginRight: currentTheme.spacing.s,
+    },
+    defaultText: {
+      ...currentTheme.typography.caption,
+      color: colors.success,
+      fontWeight: '600',
+      marginLeft: 4,
+    },
+    setDefaultButton: {
+      paddingHorizontal: currentTheme.spacing.s,
+      paddingVertical: 4,
+      marginRight: currentTheme.spacing.s,
+    },
+    setDefaultText: {
+      ...currentTheme.typography.caption,
+      color: colors.primary,
+      fontWeight: '600',
+    },
+    deleteButton: { // Layout for TouchableOpacity containing Trash2 icon
+      padding: currentTheme.spacing.xs,
+    },
+    emptyContainer: {
+      alignItems: 'center',
+      padding: currentTheme.spacing.xl,
+      backgroundColor: colors.card,
+      borderRadius: currentTheme.radius.l,
+      marginHorizontal: currentTheme.spacing.l,
+      marginBottom: currentTheme.spacing.l,
+    },
+    emptyTitle: {
+      ...currentTheme.typography.h3,
+      color: colors.text, // Added
+      marginTop: currentTheme.spacing.m,
+      marginBottom: currentTheme.spacing.s,
+    },
+    emptyText: {
+      ...currentTheme.typography.body,
+      color: colors.subtext,
+      textAlign: 'center',
+    },
+    securityNoteContainer: { // Renamed from securityNote for clarity
+      flexDirection: 'row',
+      backgroundColor: colors.highlight,
+      borderRadius: currentTheme.radius.l,
+      padding: currentTheme.spacing.m,
+      marginHorizontal: currentTheme.spacing.l,
+      marginBottom: currentTheme.spacing.xxl,
+    },
+    securityIcon: { // Layout for AlertCircle icon
+      marginRight: currentTheme.spacing.m,
+    },
+    securityText: {
+      ...currentTheme.typography.caption,
+      color: colors.subtext,
+      flex: 1,
+      lineHeight: 18,
+    },
+    modalOverlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0,0,0,0.5)', // Standard overlay
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    modalContainer: {
+      backgroundColor: colors.background,
+      borderRadius: currentTheme.radius.l,
+      width: '80%',
+      padding: currentTheme.spacing.l,
+    },
+    modalHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: currentTheme.spacing.m,
+    },
+    modalTitle: {
+      ...currentTheme.typography.h3,
+      color: colors.text, // Added
+    },
+    modalText: {
+      ...currentTheme.typography.body,
+      color: colors.subtext,
+      marginBottom: currentTheme.spacing.l,
+    },
+    modalButtons: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+    },
+    modalButton: { // For layout of individual button in modal
+      flex: 1,
+      marginHorizontal: currentTheme.spacing.xs,
+    },
+    deleteModalButton: { // Specific style for delete button background
+      backgroundColor: colors.error, 
+    },
+  });
+
+export default PaymentMethodsScreen;

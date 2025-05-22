@@ -118,7 +118,7 @@ const Button: React.FC<ButtonProps> = ({
         baseStyle.color = colors.primary; // Updated
         break;
       default: // primary, secondary
-        baseStyle.color = colors.white; // Updated (assuming colors.white is from common)
+        baseStyle.color = originalTheme.colors.common.white; 
     }
 
     return baseStyle;
@@ -136,8 +136,8 @@ const Button: React.FC<ButtonProps> = ({
         <ActivityIndicator 
           size="small" 
           color={variant === 'outline' || variant === 'ghost' 
-            ? colors.primary // Updated
-            : colors.white} // Updated
+            ? colors.primary 
+            : originalTheme.colors.common.white} 
         />
       ) : (
         <>
