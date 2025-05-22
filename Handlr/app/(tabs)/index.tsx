@@ -1,13 +1,13 @@
-
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, FlatList, TouchableOpacity, Image, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Bell, MapPin, X } from 'lucide-react-native';
-import theme from '@/constants/theme';
+import originalTheme from '@/constants/theme'; // Renamed
+import { useTheme } from '../../context/ThemeContext'; // Added
 import { categories } from '@/mocks/categories';
 import { taskers } from '@/mocks/taskers';
-import { tasks } from '@/mocks/tasks';
+import { tasks } from '@/mocks/tasks'; 
 import { Category, Tasker, Task } from '@/types';
 import CategoryCard from '@/components/CategoryCard';
 import TaskerCard from '@/components/TaskerCard';
@@ -16,6 +16,9 @@ import SearchInput from '@/components/SearchInput';
 import { useAuthStore } from '@/store/authStore';
 
 export default function HomeScreen() {
+  const { colors } = useTheme(); 
+  const styles = dynamicStyles(colors, originalTheme); 
+
   const [searchQuery, setSearchQuery] = useState('');
   const [showNotifications, setShowNotifications] = useState(false);
   const user = useAuthStore(state => state.user);
@@ -35,29 +38,10 @@ export default function HomeScreen() {
     router.push(`/task/${task.id}`);
   };
 
-  // Mock notifications
-  const notifications = [
-    {
-      id: '1',
-      title: 'New message',
-      message: 'Rajesh Kumar sent you a message',
-      time: '10 min ago',
-      read: false,
-    },
-    {
-      id: '2',
-      title: 'Task update',
-      message: 'Your cleaning task has been accepted',
-      time: '1 hour ago',
-      read: true,
-    },
-    {
-      id: '3',
-      title: 'Payment successful',
-      message: 'Payment for plumbing task was successful',
-      time: '2 days ago',
-      read: true,
-    },
+  const currentNotificationsData = [ // Renamed mock data
+    { id: '1', title: 'New message', message: 'Rajesh Kumar sent you a message', time: '10 min ago', read: false, },
+    { id: '2', title: 'Task update', message: 'Your cleaning task has been accepted', time: '1 hour ago', read: true, },
+    { id: '3', title: 'Payment successful', message: 'Payment for plumbing task was successful', time: '2 days ago', read: true, },
   ];
 
   return (
@@ -67,16 +51,16 @@ export default function HomeScreen() {
           <View>
             <Text style={styles.greeting}>Hello, {user?.name || 'User'}</Text>
             <View style={styles.locationContainer}>
-              <MapPin size={14} color={theme.colors.light.subtext} />
-              <Text style={styles.location}>Bangalore, India</Text>
+              <MapPin size={14} color={colors.subtext} /> 
+              <Text style={styles.locationText}>Bangalore, India</Text>
             </View>
           </View>
           <TouchableOpacity 
             style={styles.notificationButton}
             onPress={() => setShowNotifications(true)}
           >
-            <Bell size={24} color={theme.colors.light.text} />
-            <View style={styles.notificationBadge} />
+            <Bell size={24} color={colors.text} /> 
+            {currentNotificationsData.some(n => !n.read) && <View style={styles.notificationBadge} />}
           </TouchableOpacity>
         </View>
 
@@ -118,7 +102,7 @@ export default function HomeScreen() {
             </TouchableOpacity>
           </View>
           <FlatList
-            data={taskers.slice(0, 3)}
+            data={taskers.slice(0, 3)} 
             horizontal
             showsHorizontalScrollIndicator={false}
             keyExtractor={(item) => item.id}
@@ -138,7 +122,7 @@ export default function HomeScreen() {
               <Text style={styles.seeAllText}>Create New</Text>
             </TouchableOpacity>
           </View>
-          {tasks.length > 0 ? (
+          {tasks.length > 0 ? ( 
             tasks.map((task) => (
               <TaskCard key={task.id} task={task as Task} onPress={handleTaskPress} />
             ))
@@ -163,7 +147,6 @@ export default function HomeScreen() {
         </View>
       </ScrollView>
 
-      {/* Notifications Modal */}
       <Modal
         visible={showNotifications}
         animationType="slide"
@@ -171,16 +154,16 @@ export default function HomeScreen() {
         onRequestClose={() => setShowNotifications(false)}
       >
         <View style={styles.modalOverlay}>
-          <View style={styles.notificationsContainer}>
+          <View style={styles.notificationsModalContainer}>
             <View style={styles.notificationsHeader}>
               <Text style={styles.notificationsTitle}>Notifications</Text>
               <TouchableOpacity onPress={() => setShowNotifications(false)}>
-                <X size={24} color={theme.colors.light.text} />
+                <X size={24} color={colors.text} /> 
               </TouchableOpacity>
             </View>
             
             <FlatList
-              data={notifications}
+              data={currentNotificationsData}
               keyExtractor={(item) => item.id}
               renderItem={({ item }) => (
                 <TouchableOpacity 
@@ -210,179 +193,187 @@ export default function HomeScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.light.background,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: theme.spacing.l,
-    paddingTop: theme.spacing.l,
-    paddingBottom: theme.spacing.m,
-  },
-  greeting: {
-    ...theme.typography.h2,
-    marginBottom: theme.spacing.xs,
-  },
-  locationContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  location: {
-    ...theme.typography.bodySmall,
-    color: theme.colors.light.subtext,
-    marginLeft: theme.spacing.xs,
-  },
-  notificationButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: theme.colors.light.card,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  notificationBadge: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: theme.colors.light.error,
-  },
-  searchContainer: {
-    paddingHorizontal: theme.spacing.l,
-    marginBottom: theme.spacing.l,
-  },
-  categoriesSection: {
-    marginBottom: theme.spacing.l,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: theme.spacing.l,
-    marginBottom: theme.spacing.m,
-  },
-  sectionTitle: {
-    ...theme.typography.h3,
-  },
-  seeAllText: {
-    ...theme.typography.bodySmall,
-    color: theme.colors.light.primary,
-    fontWeight: '600',
-  },
-  categoriesList: {
-    paddingHorizontal: theme.spacing.l,
-  },
-  section: {
-    marginBottom: theme.spacing.xl,
-  },
-  taskersList: {
-    paddingHorizontal: theme.spacing.l,
-  },
-  taskerCardContainer: {
-    width: 280,
-    marginRight: theme.spacing.m,
-  },
-  emptyTasksContainer: {
-    alignItems: 'center',
-    padding: theme.spacing.xl,
-    backgroundColor: theme.colors.light.card,
-    borderRadius: theme.radius.l,
-    marginHorizontal: theme.spacing.l,
-  },
-  emptyTasksImage: {
-    width: 120,
-    height: 120,
-    marginBottom: theme.spacing.l,
-  },
-  emptyTasksTitle: {
-    ...theme.typography.h3,
-    marginBottom: theme.spacing.s,
-  },
-  emptyTasksText: {
-    ...theme.typography.body,
-    color: theme.colors.light.subtext,
-    textAlign: 'center',
-    marginBottom: theme.spacing.l,
-  },
-  createTaskButton: {
-    backgroundColor: theme.colors.light.primary,
-    paddingVertical: theme.spacing.m,
-    paddingHorizontal: theme.spacing.xl,
-    borderRadius: theme.radius.m,
-  },
-  createTaskButtonText: {
-    ...theme.typography.button,
-    color: theme.colors.common.white,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'flex-end',
-  },
-  notificationsContainer: {
-    backgroundColor: theme.colors.light.background,
-    borderTopLeftRadius: theme.radius.xl,
-    borderTopRightRadius: theme.radius.xl,
-    height: '70%',
-    paddingBottom: 20,
-  },
-  notificationsHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: theme.spacing.l,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.light.border,
-  },
-  notificationsTitle: {
-    ...theme.typography.h3,
-  },
-  notificationItem: {
-    flexDirection: 'row',
-    padding: theme.spacing.l,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.light.border,
-  },
-  unreadNotification: {
-    backgroundColor: theme.colors.light.highlight,
-  },
-  notificationContent: {
-    flex: 1,
-  },
-  notificationTitle: {
-    ...theme.typography.body,
-    fontWeight: '600',
-    marginBottom: 4,
-  },
-  notificationMessage: {
-    ...theme.typography.bodySmall,
-    color: theme.colors.light.subtext,
-    marginBottom: 4,
-  },
-  notificationTime: {
-    ...theme.typography.caption,
-    color: theme.colors.light.subtext,
-  },
-  unreadDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: theme.colors.light.primary,
-    alignSelf: 'center',
-    marginLeft: theme.spacing.s,
-  },
-  emptyNotifications: {
-    padding: theme.spacing.xl,
-    alignItems: 'center',
-  },
-  emptyNotificationsText: {
-    ...theme.typography.body,
-    color: theme.colors.light.subtext,
-  },
-});
+const dynamicStyles = (colors: ReturnType<typeof useTheme>['colors'], currentTheme: typeof originalTheme) => 
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    header: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingHorizontal: currentTheme.spacing.l,
+      paddingTop: currentTheme.spacing.l,
+      paddingBottom: currentTheme.spacing.m,
+    },
+    greeting: {
+      ...currentTheme.typography.h2,
+      color: colors.text, 
+      marginBottom: currentTheme.spacing.xs,
+    },
+    locationContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    locationText: { 
+      ...currentTheme.typography.bodySmall,
+      color: colors.subtext, 
+      marginLeft: currentTheme.spacing.xs,
+    },
+    notificationButton: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: colors.card, 
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    notificationBadge: {
+      position: 'absolute',
+      top: 8,
+      right: 8,
+      width: 8, // Original size
+      height: 8,
+      borderRadius: 4,
+      backgroundColor: colors.error, 
+    },
+    searchContainer: {
+      paddingHorizontal: currentTheme.spacing.l,
+      marginBottom: currentTheme.spacing.l,
+    },
+    categoriesSection: {
+      marginBottom: currentTheme.spacing.l,
+    },
+    sectionHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingHorizontal: currentTheme.spacing.l,
+      marginBottom: currentTheme.spacing.m,
+    },
+    sectionTitle: {
+      ...currentTheme.typography.h3,
+      color: colors.text, 
+    },
+    seeAllText: {
+      ...currentTheme.typography.bodySmall,
+      color: colors.primary, 
+      fontWeight: '600',
+    },
+    categoriesList: {
+      paddingHorizontal: currentTheme.spacing.l,
+    },
+    section: {
+      marginBottom: currentTheme.spacing.xl,
+    },
+    taskersList: {
+      paddingHorizontal: currentTheme.spacing.l,
+    },
+    taskerCardContainer: {
+      width: 280,
+      marginRight: currentTheme.spacing.m,
+    },
+    emptyTasksContainer: {
+      alignItems: 'center',
+      padding: currentTheme.spacing.xl,
+      backgroundColor: colors.card, 
+      borderRadius: currentTheme.radius.l,
+      marginHorizontal: currentTheme.spacing.l,
+    },
+    emptyTasksImage: {
+      width: 120,
+      height: 120,
+      marginBottom: currentTheme.spacing.l,
+    },
+    emptyTasksTitle: {
+      ...currentTheme.typography.h3,
+      color: colors.text, 
+      marginBottom: currentTheme.spacing.s,
+    },
+    emptyTasksText: {
+      ...currentTheme.typography.body,
+      color: colors.subtext, 
+      textAlign: 'center',
+      marginBottom: currentTheme.spacing.l,
+    },
+    createTaskButton: {
+      backgroundColor: colors.primary, 
+      paddingVertical: currentTheme.spacing.m,
+      paddingHorizontal: currentTheme.spacing.xl,
+      borderRadius: currentTheme.radius.m,
+    },
+    createTaskButtonText: {
+      ...currentTheme.typography.button,
+      color: currentTheme.colors.common.white, 
+    },
+    modalOverlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0,0,0,0.5)', 
+      justifyContent: 'flex-end',
+    },
+    notificationsModalContainer: { 
+      backgroundColor: colors.background, 
+      borderTopLeftRadius: currentTheme.radius.xl,
+      borderTopRightRadius: currentTheme.radius.xl,
+      height: '70%', 
+      paddingBottom: currentTheme.spacing.m, 
+    },
+    notificationsHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      padding: currentTheme.spacing.l,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border, 
+    },
+    notificationsTitle: { // Title for the modal "Notifications"
+      ...currentTheme.typography.h3,
+      color: colors.text, 
+    },
+    notificationItem: {
+      flexDirection: 'row',
+      padding: currentTheme.spacing.l,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border, 
+    },
+    unreadNotification: {
+      backgroundColor: colors.highlight, 
+    },
+    notificationContent: {
+      flex: 1,
+    },
+    notificationTitle: { // Title for individual notification item
+      ...currentTheme.typography.body,
+      fontWeight: '600',
+      color: colors.text, 
+      marginBottom: 4,
+    },
+    notificationMessage: {
+      ...currentTheme.typography.bodySmall,
+      color: colors.subtext, 
+      marginBottom: 4,
+    },
+    notificationTime: {
+      ...currentTheme.typography.caption,
+      color: colors.subtext, 
+    },
+    unreadDot: {
+      width: 10,
+      height: 10,
+      borderRadius: 5,
+      backgroundColor: colors.primary, 
+      alignSelf: 'center',
+      marginLeft: currentTheme.spacing.s,
+    },
+    emptyNotifications: { 
+      padding: currentTheme.spacing.xl,
+      alignItems: 'center',
+    },
+    emptyNotificationsText: {
+      ...currentTheme.typography.body,
+      color: colors.subtext, 
+    },
+  });
+
+export default HomeScreen;

@@ -87,7 +87,7 @@ export default function ProfileScreen() {
           value={item.value}
           onValueChange={item.onToggle}
           trackColor={{ false: colors.inactive, true: colors.primary }}
-          thumbColor={colors.white} 
+          thumbColor={originalTheme.colors.common.white} 
         />
       ) : item.rightText ? (
         <View style={styles.menuItemRight}>
@@ -363,7 +363,7 @@ const dynamicStyles = (colors: AppColorsType, currentTheme: typeof originalTheme
     marginLeft: currentTheme.spacing.s,
   },
   menuItemBadgeText: {
-    color: colors.white,
+    color: originalTheme.colors.common.white,
     fontSize: 10,
     fontWeight: '600',
   },

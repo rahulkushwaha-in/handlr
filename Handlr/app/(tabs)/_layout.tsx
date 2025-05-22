@@ -1,32 +1,34 @@
 import React from 'react';
-import { Tabs } from 'expo-router';
-import { Home, Search, PlusCircle, MessageSquare, User } from 'lucide-react-native';
+import { Tabs, router } from 'expo-router'; // Added router for custom create button
+import { Home, Search, PlusCircle, MessageSquare, User, LayoutGrid } from 'lucide-react-native'; // Added LayoutGrid
 import { Platform, View } from 'react-native';
-import theme from '@/constants/theme';
+import originalTheme from '@/constants/theme'; // Renamed theme to originalTheme
+import { useTheme } from '../../context/ThemeContext'; // Added useTheme
 
 export default function TabLayout() {
-  // Calculate tab bar height based on platform
+  const { colors } = useTheme(); // Accessed theme colors
+
   const tabBarHeight = Platform.OS === 'ios' ? 88 : 60;
   const tabBarPaddingBottom = Platform.OS === 'ios' ? 28 : 8;
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: theme.colors.light.primary,
-        tabBarInactiveTintColor: theme.colors.light.inactive,
+        tabBarActiveTintColor: colors.primary, 
+        tabBarInactiveTintColor: colors.subtext, 
         tabBarStyle: {
-          borderTopColor: theme.colors.light.border,
+          borderTopColor: colors.border, 
           height: tabBarHeight,
           paddingBottom: tabBarPaddingBottom,
           paddingTop: 8,
         },
         headerShown: false,
-        tabBarBackground: () => (
+        tabBarBackground: () => ( 
           <View 
             style={{ 
-              backgroundColor: theme.colors.light.background,
+              backgroundColor: colors.card, 
               borderTopWidth: 1,
-              borderTopColor: theme.colors.light.border,
+              borderTopColor: colors.border,
               height: '100%',
             }} 
           />
@@ -34,47 +36,72 @@ export default function TabLayout() {
       }}
     >
       <Tabs.Screen
-        name="index"
+        name="index" // Home
         options={{
           title: 'Home',
-          tabBarIcon: ({ color, size }) => <Home size={size} color={color} />,
+          tabBarIcon: ({ color, focused }) => <Home size={focused ? 26 : 24} color={color} strokeWidth={focused ? 2.5 : 2} />,
+        }}
+      />
+      <Tabs.Screen
+        name="categories" // New Categories Tab
+        options={{
+          title: 'Categories',
+          tabBarIcon: ({ color, focused }) => (
+            <LayoutGrid size={focused ? 26 : 24} color={color} strokeWidth={focused ? 2.5 : 2} />
+          ),
         }}
       />
       <Tabs.Screen
         name="explore"
         options={{
           title: 'Explore',
-          tabBarIcon: ({ color, size }) => <Search size={size} color={color} />,
+          tabBarIcon: ({ color, focused }) => <Search size={focused ? 26 : 24} color={color} strokeWidth={focused ? 2.5 : 2} />,
         }}
       />
       <Tabs.Screen
-        name="create"
+        name="create" // Placeholder name for the tab item itself
         options={{
-          title: 'Create',
-          tabBarIcon: ({ color, size }) => <PlusCircle size={size} color={color} />,
-          tabBarButton: (props) => (
-            <Tabs.Screen
-              name="task/create"
-              options={{
-                title: 'Create Task',
-                tabBarIcon: ({ color, size }) => <PlusCircle size={size} color={color} />,
-              }}
-            />
+          title: 'Create', // This title won't be visible due to tabBarLabel: () => null
+          tabBarIcon: ({ focused }) => ( 
+            <View style={{
+              backgroundColor: colors.primary,
+              padding: originalTheme.spacing.s,
+              borderRadius: originalTheme.radius.xl, 
+              width: 50,
+              height: 50,
+              justifyContent: 'center',
+              alignItems: 'center',
+              transform: [{ translateY: Platform.OS === 'ios' ? -15 : -10 }], 
+              shadowColor: colors.black, 
+              shadowOffset: { width: 0, height: 3 },
+              shadowOpacity: 0.2,
+              shadowRadius: 4,
+              elevation: 5,
+            }}>
+              <PlusCircle size={28} color={originalTheme.colors.common.white} />
+            </View>
           ),
+          tabBarLabel: () => null, 
+        }}
+        listeners={{
+          tabPress: (e) => {
+            e.preventDefault(); 
+            router.push('/task/create'); 
+          },
         }}
       />
       <Tabs.Screen
         name="chats"
         options={{
           title: 'Chats',
-          tabBarIcon: ({ color, size }) => <MessageSquare size={size} color={color} />,
+          tabBarIcon: ({ color, focused }) => <MessageSquare size={focused ? 26 : 24} color={color} strokeWidth={focused ? 2.5 : 2} />,
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
           title: 'Profile',
-          tabBarIcon: ({ color, size }) => <User size={size} color={color} />,
+          tabBarIcon: ({ color, focused }) => <User size={focused ? 26 : 24} color={color} strokeWidth={focused ? 2.5 : 2} />,
         }}
       />
     </Tabs>

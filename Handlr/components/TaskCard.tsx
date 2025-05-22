@@ -103,7 +103,7 @@ const dynamicStyles = (colors: ReturnType<typeof useTheme>['colors'], currentThe
       borderRadius: currentTheme.radius.l,
       padding: currentTheme.spacing.m,
       marginBottom: currentTheme.spacing.m,
-      shadowColor: colors.black, // Updated from common.black
+      shadowColor: currentTheme.colors.common.black, // Changed to common.black
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.05,
       shadowRadius: 8,
@@ -130,7 +130,7 @@ const dynamicStyles = (colors: ReturnType<typeof useTheme>['colors'], currentThe
       borderRadius: currentTheme.radius.s,
     },
     statusText: {
-      color: colors.white, // Updated from common.white
+      color: currentTheme.colors.common.white, // Changed to common.white
       fontSize: 10,
       fontWeight: '600',
     },
