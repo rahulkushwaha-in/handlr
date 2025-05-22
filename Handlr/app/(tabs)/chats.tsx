@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import theme from '@/constants/theme';
+import originalTheme from '@/constants/theme'; // Renamed
+import { useTheme } from '../../context/ThemeContext'; // Added
 import SearchInput from '@/components/SearchInput';
 import { taskers } from '@/mocks/taskers';
 
@@ -38,6 +39,9 @@ const mockConversations = [
 ];
 
 export default function ChatsScreen() {
+  const { colors } = useTheme(); // Accessed theme colors
+  const styles = dynamicStyles(colors, originalTheme); // Generate styles dynamically
+
   const [searchQuery, setSearchQuery] = useState('');
   const [conversations, setConversations] = useState(mockConversations);
 
@@ -51,16 +55,12 @@ export default function ChatsScreen() {
     const diffInDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
     
     if (diffInDays === 0) {
-      // Today, show time
       return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     } else if (diffInDays === 1) {
-      // Yesterday
       return 'Yesterday';
     } else if (diffInDays < 7) {
-      // Within a week, show day name
       return date.toLocaleDateString([], { weekday: 'short' });
     } else {
-      // More than a week, show date
       return date.toLocaleDateString([], { day: 'numeric', month: 'short' });
     }
   };
@@ -109,7 +109,7 @@ export default function ChatsScreen() {
                 source={{ uri: tasker.avatar }}
                 style={styles.avatar}
               />
-              {!item.lastMessage.read && <View style={styles.unreadBadge} />}
+              {!item.lastMessage.read && <View style={styles.unreadBadge} />} 
               <View style={styles.conversationContent}>
                 <View style={styles.conversationHeader}>
                   <Text style={styles.name}>{tasker.name}</Text>
@@ -141,84 +141,90 @@ export default function ChatsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.light.background,
-  },
-  header: {
-    paddingHorizontal: theme.spacing.l,
-    paddingTop: theme.spacing.l,
-    paddingBottom: theme.spacing.m,
-  },
-  title: {
-    ...theme.typography.h2,
-  },
-  searchContainer: {
-    paddingHorizontal: theme.spacing.l,
-    marginBottom: theme.spacing.l,
-  },
-  conversationItem: {
-    flexDirection: 'row',
-    padding: theme.spacing.m,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.light.border,
-    position: 'relative',
-  },
-  avatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    marginRight: theme.spacing.m,
-  },
-  unreadBadge: {
-    position: 'absolute',
-    top: 20,
-    left: 45,
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: theme.colors.light.primary,
-    borderWidth: 2,
-    borderColor: theme.colors.light.background,
-  },
-  conversationContent: {
-    flex: 1,
-  },
-  conversationHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 4,
-  },
-  name: {
-    ...theme.typography.body,
-    fontWeight: '600',
-  },
-  time: {
-    ...theme.typography.caption,
-    color: theme.colors.light.subtext,
-  },
-  message: {
-    ...theme.typography.bodySmall,
-    color: theme.colors.light.subtext,
-  },
-  unreadMessage: {
-    color: theme.colors.light.text,
-    fontWeight: '500',
-  },
-  emptyContainer: {
-    alignItems: 'center',
-    padding: theme.spacing.xl,
-    marginTop: theme.spacing.xl,
-  },
-  emptyTitle: {
-    ...theme.typography.h3,
-    marginBottom: theme.spacing.s,
-  },
-  emptyText: {
-    ...theme.typography.body,
-    color: theme.colors.light.subtext,
-    textAlign: 'center',
-  },
-});
+const dynamicStyles = (colors: ReturnType<typeof useTheme>['colors'], currentTheme: typeof originalTheme) => 
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background, // Updated
+    },
+    header: {
+      paddingHorizontal: currentTheme.spacing.l,
+      paddingTop: currentTheme.spacing.l,
+      paddingBottom: currentTheme.spacing.m,
+    },
+    title: {
+      ...currentTheme.typography.h2,
+      color: colors.text, // Added color
+    },
+    searchContainer: {
+      paddingHorizontal: currentTheme.spacing.l,
+      marginBottom: currentTheme.spacing.l,
+    },
+    conversationItem: {
+      flexDirection: 'row',
+      padding: currentTheme.spacing.m,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border, // Updated
+      position: 'relative', 
+    },
+    avatar: {
+      width: 50,
+      height: 50,
+      borderRadius: 25,
+      marginRight: currentTheme.spacing.m,
+    },
+    unreadBadge: {
+      position: 'absolute',
+      top: 20, // Reverted to original fixed value
+      left: 45, // Reverted to original fixed value
+      width: 12,
+      height: 12,
+      borderRadius: 6,
+      backgroundColor: colors.primary, // Updated
+      borderWidth: 2,
+      borderColor: colors.background, // Updated (to match overall screen background)
+    },
+    conversationContent: {
+      flex: 1,
+    },
+    conversationHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 4,
+    },
+    name: {
+      ...currentTheme.typography.body,
+      fontWeight: '600',
+      color: colors.text, // Added color
+    },
+    time: {
+      ...currentTheme.typography.caption,
+      color: colors.subtext, // Updated
+    },
+    message: {
+      ...currentTheme.typography.bodySmall,
+      color: colors.subtext, // Updated
+    },
+    unreadMessage: {
+      color: colors.text, // Updated
+      fontWeight: '500',
+    },
+    emptyContainer: {
+      alignItems: 'center',
+      padding: currentTheme.spacing.xl,
+      marginTop: currentTheme.spacing.xl,
+    },
+    emptyTitle: {
+      ...currentTheme.typography.h3,
+      color: colors.text, // Added color
+      marginBottom: currentTheme.spacing.s,
+    },
+    emptyText: {
+      ...currentTheme.typography.body,
+      color: colors.subtext, // Updated
+      textAlign: 'center',
+    },
+  });
+
+export default ChatsScreen;

@@ -1,8 +1,9 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { Tasker } from '@/types';
-import theme from '@/constants/theme';
-import { Star, MapPin } from 'lucide-react-native';
+import originalTheme from '@/constants/theme'; // Renamed
+import { useTheme } from '../context/ThemeContext'; // Added
+import { Star, MapPin } from 'lucide-react-native'; // CheckCircle not used in original
 
 interface TaskerCardProps {
   tasker: Tasker;
@@ -10,6 +11,9 @@ interface TaskerCardProps {
 }
 
 const TaskerCard: React.FC<TaskerCardProps> = ({ tasker, onPress }) => {
+  const { colors } = useTheme(); // Accessed theme colors
+  const styles = dynamicStyles(colors, originalTheme); // Generate styles dynamically
+
   return (
     <TouchableOpacity
       style={styles.container}
@@ -31,13 +35,13 @@ const TaskerCard: React.FC<TaskerCardProps> = ({ tasker, onPress }) => {
             )}
           </View>
           <View style={styles.ratingContainer}>
-            <Star size={16} color={theme.colors.light.warning} fill={theme.colors.light.warning} />
+            <Star size={16} color={colors.warning} fill={colors.warning} /> 
             <Text style={styles.rating}>
               {tasker.rating.toFixed(1)} ({tasker.totalReviews})
             </Text>
           </View>
           <View style={styles.locationContainer}>
-            <MapPin size={14} color={theme.colors.light.subtext} />
+            <MapPin size={14} color={colors.subtext} /> 
             <Text style={styles.location} numberOfLines={1}>
               {tasker.location?.address}
             </Text>
@@ -61,98 +65,108 @@ const TaskerCard: React.FC<TaskerCardProps> = ({ tasker, onPress }) => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: theme.colors.light.card,
-    borderRadius: theme.radius.l,
-    padding: theme.spacing.m,
-    marginBottom: theme.spacing.m,
-    shadowColor: theme.colors.common.black,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  avatar: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    marginRight: theme.spacing.m,
-  },
-  info: {
-    flex: 1,
-  },
-  nameRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: theme.spacing.xs,
-  },
-  name: {
-    ...theme.typography.h4,
-    marginRight: theme.spacing.s,
-  },
-  verifiedBadge: {
-    backgroundColor: theme.colors.light.success,
-    paddingHorizontal: theme.spacing.s,
-    paddingVertical: 2,
-    borderRadius: theme.radius.s,
-  },
-  verifiedText: {
-    color: theme.colors.common.white,
-    fontSize: 10,
-    fontWeight: '600',
-  },
-  ratingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: theme.spacing.xs,
-  },
-  rating: {
-    ...theme.typography.bodySmall,
-    marginLeft: theme.spacing.xs,
-    color: theme.colors.light.text,
-  },
-  locationContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  location: {
-    ...theme.typography.caption,
-    color: theme.colors.light.subtext,
-    marginLeft: theme.spacing.xs,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: theme.colors.light.border,
-    marginVertical: theme.spacing.m,
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  experienceLabel: {
-    ...theme.typography.caption,
-    color: theme.colors.light.subtext,
-    marginBottom: 2,
-  },
-  experienceValue: {
-    ...theme.typography.bodySmall,
-    fontWeight: '600',
-  },
-  rateLabel: {
-    ...theme.typography.caption,
-    color: theme.colors.light.subtext,
-    marginBottom: 2,
-  },
-  rateValue: {
-    ...theme.typography.bodySmall,
-    fontWeight: '600',
-    color: theme.colors.light.primary,
-  },
-});
+// Converted styles to a function that accepts colors and originalTheme
+const dynamicStyles = (colors: ReturnType<typeof useTheme>['colors'], currentTheme: typeof originalTheme) => 
+  StyleSheet.create({
+    container: {
+      backgroundColor: colors.card, // Updated
+      borderRadius: currentTheme.radius.l,
+      padding: currentTheme.spacing.m,
+      marginBottom: currentTheme.spacing.m,
+      shadowColor: colors.black, // Updated
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.05,
+      shadowRadius: 8,
+      elevation: 2,
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    avatar: {
+      width: 60,
+      height: 60,
+      borderRadius: 30,
+      marginRight: currentTheme.spacing.m,
+    },
+    info: {
+      flex: 1,
+    },
+    nameRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: currentTheme.spacing.xs,
+    },
+    name: {
+      ...currentTheme.typography.h4,
+      color: colors.text, // Updated
+      marginRight: currentTheme.spacing.s,
+    },
+    verifiedBadge: {
+      backgroundColor: colors.success, // Updated
+      paddingHorizontal: currentTheme.spacing.s,
+      paddingVertical: 2,
+      borderRadius: currentTheme.radius.s,
+    },
+    verifiedText: {
+      color: colors.white, // Updated (assuming white is contrast for success)
+      fontSize: 10,
+      fontWeight: '600',
+    },
+    ratingContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: currentTheme.spacing.xs,
+    },
+    rating: {
+      ...currentTheme.typography.bodySmall,
+      marginLeft: currentTheme.spacing.xs,
+      color: colors.text, // Updated
+    },
+    locationContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    location: {
+      ...currentTheme.typography.caption,
+      color: colors.subtext, // Updated
+      marginLeft: currentTheme.spacing.xs,
+    },
+    divider: {
+      height: 1,
+      backgroundColor: colors.border, // Updated
+      marginVertical: currentTheme.spacing.m,
+    },
+    footer: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+    },
+    experienceLabel: {
+      ...currentTheme.typography.caption,
+      color: colors.subtext, // Updated
+      marginBottom: 2,
+    },
+    experienceValue: {
+      ...currentTheme.typography.bodySmall,
+      fontWeight: '600',
+      color: colors.text, // Added color
+    },
+    rateLabel: {
+      ...currentTheme.typography.caption,
+      color: colors.subtext, // Updated
+      marginBottom: 2,
+    },
+    rateValue: {
+      ...currentTheme.typography.bodySmall,
+      fontWeight: '600',
+      color: colors.primary, // Updated
+    },
+    // Styles mentioned in prompt but not in original code (example):
+    // categoryText: { color: colors.primary },
+    // distanceText: { color: colors.subtext },
+    // completedTasksText: { color: colors.subtext },
+    // viewProfileButton: { backgroundColor: colors.highlight },
+    // viewProfileButtonText: { color: colors.primary },
+  });
 
 export default TaskerCard;

@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Alert, Swi
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { useAuthStore } from '@/store/authStore';
-import theme from '@/constants/theme';
+import originalTheme from '@/constants/theme'; // Renamed to avoid conflict with theme from useTheme
 import Button from '@/components/Button';
 import { 
   User, 
@@ -17,123 +17,59 @@ import {
   Heart,
   Star,
   FileText,
-  Clock,
-  Gift,
-  Share2,
   Moon,
   Globe,
   X
 } from 'lucide-react-native';
+import { useTheme } from '../../context/ThemeContext';
+
+type AppColorsType = ReturnType<typeof useTheme>['colors'];
 
 export default function ProfileScreen() {
   const { user, logout } = useAuthStore();
+  const { colors, isDark, setThemePreference, theme: currentActiveTheme } = useTheme(); 
+  
   const [showThemeModal, setShowThemeModal] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
   const [notifications, setNotifications] = useState(true);
-  const [emailNotifications, setEmailNotifications] = useState(true);
 
   const handleLogout = () => {
     Alert.alert(
       "Logout",
       "Are you sure you want to logout?",
       [
-        {
-          text: "Cancel",
-          style: "cancel"
-        },
-        { 
-          text: "Logout", 
-          onPress: () => logout(),
-          style: "destructive"
-        }
+        { text: "Cancel", style: "cancel" },
+        { text: "Logout", onPress: () => logout(), style: "destructive" }
       ]
     );
   };
 
+  const styles = dynamicStyles(colors, originalTheme);
+
   const personalMenuItems = [
-    {
-      icon: <User size={20} color={theme.colors.light.text} />,
-      title: 'Personal Information',
-      onPress: () => router.push('/profile/personal-info'),
-    },
-    {
-      icon: <CreditCard size={20} color={theme.colors.light.text} />,
-      title: 'Payment Methods',
-      onPress: () => router.push('/profile/payment-methods'),
-    },
-    {
-      icon: <Heart size={20} color={theme.colors.light.text} />,
-      title: 'Saved Taskers',
-      onPress: () => router.push('/profile/saved-taskers'),
-      badge: '3',
-    },
-    {
-      icon: <Star size={20} color={theme.colors.light.text} />,
-      title: 'Reviews & Ratings',
-      onPress: () => router.push('/profile/reviews'),
-    },
-    {
-      icon: <FileText size={20} color={theme.colors.light.text} />,
-      title: 'Transaction History',
-      onPress: () => router.push('/profile/transactions'),
-    },
+    { icon: <User size={20} color={colors.text} />, title: 'Personal Information', onPress: () => router.push('/profile/personal-info') },
+    { icon: <CreditCard size={20} color={colors.text} />, title: 'Payment Methods', onPress: () => router.push('/profile/payment-methods') },
+    { icon: <Heart size={20} color={colors.text} />, title: 'Saved Taskers', onPress: () => router.push('/profile/saved-taskers'), badge: '3' },
+    { icon: <Star size={20} color={colors.text} />, title: 'Reviews & Ratings', onPress: () => router.push('/profile/reviews') },
+    { icon: <FileText size={20} color={colors.text} />, title: 'Transaction History', onPress: () => router.push('/profile/transactions') },
   ];
 
   const preferencesMenuItems = [
-    {
-      icon: <Bell size={20} color={theme.colors.light.text} />,
-      title: 'Notifications',
-      onPress: () => {},
-      toggle: true,
-      value: notifications,
-      onToggle: () => setNotifications(!notifications),
-    },
-    {
-      icon: <Moon size={20} color={theme.colors.light.text} />,
-      title: 'Dark Mode',
-      onPress: () => setShowThemeModal(true),
-      toggle: true,
-      value: darkMode,
-      onToggle: () => setDarkMode(!darkMode),
-    },
-    {
-      icon: <Globe size={20} color={theme.colors.light.text} />,
-      title: 'Language',
-      onPress: () => {},
-      rightText: 'English',
-    },
+    { icon: <Bell size={20} color={colors.text} />, title: 'Notifications', onPress: () => {}, toggle: true, value: notifications, onToggle: () => setNotifications(!notifications) },
+    { icon: <Moon size={20} color={colors.text} />, title: 'Dark Mode', onPress: () => setShowThemeModal(true), toggle: true, value: isDark, onToggle: () => setThemePreference(isDark ? 'light' : 'dark') },
+    { icon: <Globe size={20} color={colors.text} />, title: 'Language', onPress: () => {}, rightText: 'English' },
   ];
 
   const supportMenuItems = [
-    {
-      icon: <HelpCircle size={20} color={theme.colors.light.text} />,
-      title: 'Help & Support',
-      onPress: () => {},
-    },
-    {
-      icon: <Shield size={20} color={theme.colors.light.text} />,
-      title: 'Privacy & Security',
-      onPress: () => {},
-    },
-    {
-      icon: <Settings size={20} color={theme.colors.light.text} />,
-      title: 'Settings',
-      onPress: () => {},
-    },
-    {
-      icon: <Share2 size={20} color={theme.colors.light.text} />,
-      title: 'Invite Friends',
-      onPress: () => {},
-    },
+    { icon: <HelpCircle size={20} color={colors.text} />, title: 'Help & Support', onPress: () => {} },
+    { icon: <Shield size={20} color={colors.text} />, title: 'Privacy & Security', onPress: () => {} },
+    { icon: <Settings size={20} color={colors.text} />, title: 'Settings', onPress: () => {} },
+    { icon: <Share2 size={20} color={colors.text} />, title: 'Invite Friends', onPress: () => {} },
   ];
 
   const renderMenuItem = (item: any, index: number, isLast: boolean) => (
     <TouchableOpacity
       key={index}
-      style={[
-        styles.menuItem,
-        !isLast && styles.menuItemBorder,
-      ]}
+      style={[ styles.menuItem, !isLast && styles.menuItemBorder ]} // Corrected !isLask to !isLast
       onPress={item.onPress}
     >
       <View style={styles.menuItemLeft}>
@@ -150,16 +86,16 @@ export default function ProfileScreen() {
         <Switch
           value={item.value}
           onValueChange={item.onToggle}
-          trackColor={{ false: theme.colors.light.inactive, true: theme.colors.light.primary }}
-          thumbColor={theme.colors.common.white}
+          trackColor={{ false: colors.inactive, true: colors.primary }}
+          thumbColor={colors.white} 
         />
       ) : item.rightText ? (
         <View style={styles.menuItemRight}>
           <Text style={styles.menuItemRightText}>{item.rightText}</Text>
-          <ChevronRight size={20} color={theme.colors.light.subtext} />
+          <ChevronRight size={20} color={colors.subtext} />
         </View>
       ) : (
-        <ChevronRight size={20} color={theme.colors.light.subtext} />
+        <ChevronRight size={20} color={colors.subtext} />
       )}
     </TouchableOpacity>
   );
@@ -239,7 +175,7 @@ export default function ProfileScreen() {
             title="Logout"
             onPress={handleLogout}
             variant="outline"
-            leftIcon={<LogOut size={18} color={theme.colors.light.primary} />}
+            leftIcon={<LogOut size={18} color={colors.primary} />}
           />
         </View>
 
@@ -248,7 +184,6 @@ export default function ProfileScreen() {
         </View>
       </ScrollView>
 
-      {/* Theme Modal */}
       <Modal
         visible={showThemeModal}
         animationType="fade"
@@ -260,44 +195,35 @@ export default function ProfileScreen() {
             <View style={styles.themeModalHeader}>
               <Text style={styles.themeModalTitle}>Choose Theme</Text>
               <TouchableOpacity onPress={() => setShowThemeModal(false)}>
-                <X size={24} color={theme.colors.light.text} />
+                <X size={24} color={colors.text} />
               </TouchableOpacity>
             </View>
             
             <TouchableOpacity 
-              style={[styles.themeOption, !darkMode && styles.themeOptionSelected]}
-              onPress={() => {
-                setDarkMode(false);
-                setShowThemeModal(false);
-              }}
+              style={[styles.themeOption, currentActiveTheme === 'light' && styles.themeOptionSelected]}
+              onPress={() => { setThemePreference('light'); setShowThemeModal(false); }}
             >
               <View style={styles.themePreview}>
                 <View style={styles.themePreviewLight} />
               </View>
               <Text style={styles.themeOptionText}>Light</Text>
-              {!darkMode && <View style={styles.themeOptionCheck} />}
+              {currentActiveTheme === 'light' && <View style={styles.themeOptionCheck} />}
             </TouchableOpacity>
             
             <TouchableOpacity 
-              style={[styles.themeOption, darkMode && styles.themeOptionSelected]}
-              onPress={() => {
-                setDarkMode(true);
-                setShowThemeModal(false);
-              }}
+              style={[styles.themeOption, currentActiveTheme === 'dark' && styles.themeOptionSelected]}
+              onPress={() => { setThemePreference('dark'); setShowThemeModal(false); }}
             >
               <View style={styles.themePreview}>
                 <View style={styles.themePreviewDark} />
               </View>
               <Text style={styles.themeOptionText}>Dark</Text>
-              {darkMode && <View style={styles.themeOptionCheck} />}
+              {currentActiveTheme === 'dark' && <View style={styles.themeOptionCheck} />}
             </TouchableOpacity>
             
             <TouchableOpacity 
               style={styles.themeOption}
-              onPress={() => {
-                // In a real app, this would follow system settings
-                setShowThemeModal(false);
-              }}
+              onPress={() => { setThemePreference('system'); setShowThemeModal(false); }}
             >
               <View style={styles.themePreview}>
                 <View style={styles.themePreviewSystem}>
@@ -314,30 +240,31 @@ export default function ProfileScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const dynamicStyles = (colors: AppColorsType, currentTheme: typeof originalTheme) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.light.background,
+    backgroundColor: colors.background,
   },
   scrollContent: {
-    paddingBottom: 100, // Extra padding to avoid tab bar overlap
+    paddingBottom: 100,
   },
   header: {
-    paddingHorizontal: theme.spacing.l,
-    paddingTop: theme.spacing.l,
-    paddingBottom: theme.spacing.m,
+    paddingHorizontal: currentTheme.spacing.l,
+    paddingTop: currentTheme.spacing.l,
+    paddingBottom: currentTheme.spacing.m,
   },
   title: {
-    ...theme.typography.h2,
+    ...currentTheme.typography.h2,
+    color: colors.text,
   },
   profileSection: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: theme.spacing.l,
-    backgroundColor: theme.colors.light.card,
-    marginHorizontal: theme.spacing.l,
-    borderRadius: theme.radius.l,
-    marginBottom: theme.spacing.l,
+    padding: currentTheme.spacing.l,
+    backgroundColor: colors.card,
+    marginHorizontal: currentTheme.spacing.l,
+    borderRadius: currentTheme.radius.l,
+    marginBottom: currentTheme.spacing.l,
   },
   profileImage: {
     width: 70,
@@ -346,16 +273,17 @@ const styles = StyleSheet.create({
   },
   profileInfo: {
     flex: 1,
-    marginLeft: theme.spacing.m,
+    marginLeft: currentTheme.spacing.m,
   },
   profileName: {
-    ...theme.typography.h3,
+    ...currentTheme.typography.h3,
+    color: colors.text,
     marginBottom: 4,
   },
   profilePhone: {
-    ...theme.typography.bodySmall,
-    color: theme.colors.light.subtext,
-    marginBottom: theme.spacing.s,
+    ...currentTheme.typography.bodySmall,
+    color: colors.subtext,
+    marginBottom: currentTheme.spacing.s,
   },
   profileStats: {
     flexDirection: 'row',
@@ -365,75 +293,77 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   profileStatValue: {
-    ...theme.typography.body,
+    ...currentTheme.typography.body,
     fontWeight: '600',
+    color: colors.text,
   },
   profileStatLabel: {
-    ...theme.typography.caption,
-    color: theme.colors.light.subtext,
+    ...currentTheme.typography.caption,
+    color: colors.subtext,
   },
   profileStatDivider: {
     width: 1,
     height: 24,
-    backgroundColor: theme.colors.light.border,
-    marginHorizontal: theme.spacing.m,
+    backgroundColor: colors.border,
+    marginHorizontal: currentTheme.spacing.m,
   },
   editButton: {
-    paddingHorizontal: theme.spacing.m,
-    paddingVertical: theme.spacing.s,
-    backgroundColor: theme.colors.light.highlight,
-    borderRadius: theme.radius.m,
+    paddingHorizontal: currentTheme.spacing.m,
+    paddingVertical: currentTheme.spacing.s,
+    backgroundColor: colors.highlight,
+    borderRadius: currentTheme.radius.m,
   },
   editButtonText: {
-    ...theme.typography.bodySmall,
-    color: theme.colors.light.primary,
+    ...currentTheme.typography.bodySmall,
+    color: colors.primary,
     fontWeight: '600',
   },
   sectionTitle: {
-    paddingHorizontal: theme.spacing.l,
-    marginBottom: theme.spacing.s,
-    marginTop: theme.spacing.l,
+    paddingHorizontal: currentTheme.spacing.l,
+    marginBottom: currentTheme.spacing.s,
+    marginTop: currentTheme.spacing.l,
   },
   sectionTitleText: {
-    ...theme.typography.bodySmall,
-    color: theme.colors.light.subtext,
+    ...currentTheme.typography.bodySmall,
+    color: colors.subtext,
     fontWeight: '600',
     textTransform: 'uppercase',
   },
   menuSection: {
-    backgroundColor: theme.colors.light.card,
-    borderRadius: theme.radius.l,
-    marginHorizontal: theme.spacing.l,
-    marginBottom: theme.spacing.l,
+    backgroundColor: colors.card,
+    borderRadius: currentTheme.radius.l,
+    marginHorizontal: currentTheme.spacing.l,
+    marginBottom: currentTheme.spacing.l,
     overflow: 'hidden',
   },
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: theme.spacing.l,
+    padding: currentTheme.spacing.l,
   },
   menuItemBorder: {
     borderBottomWidth: 1,
-    borderBottomColor: theme.colors.light.border,
+    borderBottomColor: colors.border,
   },
   menuItemLeft: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   menuItemTitle: {
-    ...theme.typography.body,
-    marginLeft: theme.spacing.m,
+    ...currentTheme.typography.body,
+    color: colors.text,
+    marginLeft: currentTheme.spacing.m,
   },
   menuItemBadge: {
-    backgroundColor: theme.colors.light.primary,
+    backgroundColor: colors.primary,
     borderRadius: 10,
     paddingHorizontal: 6,
     paddingVertical: 2,
-    marginLeft: theme.spacing.s,
+    marginLeft: currentTheme.spacing.s,
   },
   menuItemBadgeText: {
-    color: theme.colors.common.white,
+    color: colors.white,
     fontSize: 10,
     fontWeight: '600',
   },
@@ -442,22 +372,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   menuItemRightText: {
-    ...theme.typography.bodySmall,
-    color: theme.colors.light.subtext,
-    marginRight: theme.spacing.s,
+    ...currentTheme.typography.bodySmall,
+    color: colors.subtext,
+    marginRight: currentTheme.spacing.s,
   },
   logoutSection: {
-    marginHorizontal: theme.spacing.l,
-    marginBottom: theme.spacing.l,
+    marginHorizontal: currentTheme.spacing.l,
+    marginBottom: currentTheme.spacing.l,
   },
   versionSection: {
     alignItems: 'center',
-    marginBottom: theme.spacing.xl,
-    paddingBottom: theme.spacing.xl,
+    marginBottom: currentTheme.spacing.xl,
+    paddingBottom: currentTheme.spacing.xl,
   },
   versionText: {
-    ...theme.typography.caption,
-    color: theme.colors.light.subtext,
+    ...currentTheme.typography.caption,
+    color: colors.subtext,
   },
   modalOverlay: {
     flex: 1,
@@ -466,42 +396,43 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   themeModal: {
-    backgroundColor: theme.colors.light.background,
-    borderRadius: theme.radius.l,
+    backgroundColor: colors.background,
+    borderRadius: currentTheme.radius.l,
     width: '80%',
-    padding: theme.spacing.l,
+    padding: currentTheme.spacing.l,
   },
   themeModalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: theme.spacing.l,
+    marginBottom: currentTheme.spacing.l,
   },
   themeModalTitle: {
-    ...theme.typography.h3,
+    ...currentTheme.typography.h3,
+    color: colors.text,
   },
   themeOption: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: theme.spacing.m,
-    borderRadius: theme.radius.m,
-    marginBottom: theme.spacing.s,
+    padding: currentTheme.spacing.m,
+    borderRadius: currentTheme.radius.m,
+    marginBottom: currentTheme.spacing.s,
   },
   themeOptionSelected: {
-    backgroundColor: theme.colors.light.highlight,
+    backgroundColor: colors.highlight,
   },
   themePreview: {
     width: 40,
     height: 40,
     borderRadius: 20,
     overflow: 'hidden',
-    marginRight: theme.spacing.m,
+    marginRight: currentTheme.spacing.m,
     borderWidth: 1,
-    borderColor: theme.colors.light.border,
+    borderColor: colors.border,
   },
   themePreviewLight: {
     flex: 1,
-    backgroundColor: theme.colors.light.background,
+    backgroundColor: '#FFFFFF',
   },
   themePreviewDark: {
     flex: 1,
@@ -513,22 +444,21 @@ const styles = StyleSheet.create({
   },
   themePreviewSystemLight: {
     flex: 1,
-    backgroundColor: theme.colors.light.background,
+    backgroundColor: '#FFFFFF',
   },
   themePreviewSystemDark: {
     flex: 1,
     backgroundColor: '#1A1D1F',
   },
   themeOptionText: {
-    ...theme.typography.body,
+    ...currentTheme.typography.body,
+    color: colors.text,
     flex: 1,
   },
   themeOptionCheck: {
     width: 20,
     height: 20,
     borderRadius: 10,
-    backgroundColor: theme.colors.light.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: colors.primary,
   },
 });
