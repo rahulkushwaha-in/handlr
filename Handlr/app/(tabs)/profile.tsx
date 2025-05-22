@@ -19,7 +19,8 @@ import {
   FileText,
   Moon,
   Globe,
-  X
+  X,
+  Share2
 } from 'lucide-react-native';
 import { useTheme } from '../../context/ThemeContext';
 
@@ -101,7 +102,7 @@ export default function ProfileScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <View style={styles.container}>
       <ScrollView 
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
@@ -236,7 +237,7 @@ export default function ProfileScreen() {
           </View>
         </View>
       </Modal>
-    </SafeAreaView>
+    </View>
   );
 }
 

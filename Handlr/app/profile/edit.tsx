@@ -17,7 +17,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ChevronLeft, Camera, Check } from 'lucide-react-native';
 import * as ImagePicker from 'expo-image-picker';
 import originalTheme from '@/constants/theme'; // Renamed
-import { useTheme } from '../../../context/ThemeContext'; // Corrected path
+import { useTheme } from '@/context/ThemeContext'; // Corrected path
 import Button from '@/components/Button';
 import { useAuthStore } from '@/store/authStore';
 
@@ -101,14 +101,7 @@ export default function EditProfileScreen() {
   };
 
   return (
-    <>
-      {/* Stack.Screen options are now set dynamically via useEffect and setOptions */}
-      <KeyboardAvoidingView
-        style={{ flex: 1, backgroundColor: colors.background }} 
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0} 
-      >
-        <SafeAreaView style={styles.container} edges={['bottom']}>
+          <View style={styles.container}>
           <ScrollView showsVerticalScrollIndicator={false}>
             <View style={styles.avatarContainer}>
               <Image source={{ uri: avatar }} style={styles.avatar} />
@@ -196,9 +189,8 @@ export default function EditProfileScreen() {
               />
             </View>
           </ScrollView>
-        </SafeAreaView>
-      </KeyboardAvoidingView>
-    </>
+          </View>
+
   );
 }
 

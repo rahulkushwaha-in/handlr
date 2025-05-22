@@ -12,7 +12,7 @@ import { router, Stack, useNavigation } from 'expo-router'; // Added useNavigati
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ChevronLeft, Star, ThumbsUp, ThumbsDown } from 'lucide-react-native';
 import originalTheme from '@/constants/theme'; // Renamed
-import { useTheme } from '../../../context/ThemeContext'; // Added
+import { useTheme } from '@/context/ThemeContext'; // Added
 
 // Define review types (assuming these are correct)
 interface ReviewGiven {

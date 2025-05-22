@@ -10,7 +10,7 @@ import { router, Stack, useNavigation } from 'expo-router'; // Added useNavigati
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ChevronLeft, Edit2 } from 'lucide-react-native';
 import originalTheme from '@/constants/theme'; // Renamed
-import { useTheme } from '../../../context/ThemeContext'; // Added
+import { useTheme } from '@/context/ThemeContext'; // Added
 import { useAuthStore } from '@/store/authStore';
 
 export default function PersonalInfoScreen() {
@@ -146,7 +146,7 @@ const dynamicStyles = (colors: ReturnType<typeof useTheme>['colors'], currentThe
     infoContainer: {
       backgroundColor: colors.card,
       borderRadius: currentTheme.radius.l,
-      marginHorizontal: currentTheme.spacing.l,
+      marginHorizontal: currentTheme.spacing.s,
       marginTop: currentTheme.spacing.l,
       marginBottom: currentTheme.spacing.l,
       overflow: 'hidden', // To respect borderRadius with borders

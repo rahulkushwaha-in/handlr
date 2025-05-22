@@ -79,7 +79,7 @@ export default function ChatsScreen() {
   });
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Chats</Text>
       </View>
@@ -137,7 +137,7 @@ export default function ChatsScreen() {
           </View>
         }
       />
-    </SafeAreaView>
+    </View>
   );
 }
 

@@ -1,17 +1,17 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, FlatList } from 'react-native'; // Added FlatList
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useTheme } from '../../context/ThemeContext';
+import { useTheme } from '@/context/ThemeContext';
 import originalTheme from '@/constants/theme'; 
-import SearchInput from '../../../components/SearchInput';
-import { 
-  CaretDown,
+import SearchInput from '@/components/SearchInput';
+import {
   House, 
+  ChevronDown,
   Droplets, 
   Nut, // Using Nut for Electrician and Carpentry as a general "fixing" icon
   Package as MovingIcon, // Renamed to avoid conflict with React.Package
   Car, 
-  PaintBrush, 
+  Paintbrush, 
   Leaf, 
   Dog, 
   Laptop, 
@@ -19,18 +19,18 @@ import {
   Scissors, 
   Baby 
 } from 'lucide-react-native';
-import { categories as mockCategories } from '../../../mocks/categories'; // Import mock categories
+import { categories as mockCategories } from '@/mocks/categories'; // Import mock categories
 
 type AppColorsType = ReturnType<typeof useTheme>['colors'];
 type CategoryType = typeof mockCategories[0]; // Infer type from mock data
 
 // Icon mapping using string keys (category IDs from mock data)
-const iconMap: { [key: string]: React.ElementType } = {
+const iconMap: { [key: string]: React.ComponentType<any> } = {
   '1': House,        // Cleaning (Spray can in mock, using House as generic home service)
   '2': Droplets,     // Plumbing (Wrench in mock)
   '3': Nut,          // Electrician (Zap in mock)
   '4': Nut,          // Carpentry (Hammer in mock)
-  '5': PaintBrush,   // Painting
+  '5': Paintbrush,   // Painting
   '6': Leaf,         // Gardening (Flower in mock)
   '7': MovingIcon,   // Errands (Shopping bag in mock, Package for delivery/errands)
   '8': MovingIcon,   // Moving (Truck in mock, Package can also represent moving boxes)
@@ -81,15 +81,15 @@ export default function CategoriesScreen() {
           <View style={styles.filtersContainer}>
             <TouchableOpacity style={styles.filterButton}>
               <Text style={styles.filterButtonText}>Popular</Text>
-              <CaretDown size={18} color={colors.text} />
+              <ChevronDown size={18} color={colors.text} />
             </TouchableOpacity>
             <TouchableOpacity style={styles.filterButton}>
               <Text style={styles.filterButtonText}>Nearby</Text>
-              <CaretDown size={18} color={colors.text} />
+              <ChevronDown size={18} color={colors.text} />
             </TouchableOpacity>
             <TouchableOpacity style={styles.filterButton}>
               <Text style={styles.filterButtonText}>Price</Text>
-              <CaretDown size={18} color={colors.text} />
+              <ChevronDown size={18} color={colors.text} />
             </TouchableOpacity>
           </View>
           

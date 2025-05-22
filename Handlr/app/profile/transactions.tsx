@@ -20,7 +20,7 @@ import {
   Wallet
 } from 'lucide-react-native';
 import originalTheme from '@/constants/theme'; // Renamed
-import { useTheme } from '../../../context/ThemeContext'; // Added
+import { useTheme } from '@/context/ThemeContext'; // Added
 
 // Mock transactions data (data remains the same)
 const mockTransactions = [
@@ -218,6 +218,7 @@ const dynamicStyles = (colors: ReturnType<typeof useTheme>['colors'], currentThe
       borderRadius: currentTheme.radius.l,
       marginHorizontal: currentTheme.spacing.l,
       marginTop: currentTheme.spacing.l,
+      marginBottom: currentTheme.spacing.s,
       padding: currentTheme.spacing.l,
     },
     summaryItem: {

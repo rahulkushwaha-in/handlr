@@ -21,7 +21,7 @@ import {
   AlertCircle
 } from 'lucide-react-native';
 import originalTheme from '@/constants/theme'; // Renamed
-import { useTheme } from '../../../context/ThemeContext'; // Added
+import { useTheme } from '@/context/ThemeContext'; // Added
 import Button from '@/components/Button';
 
 // Mock payment methods (data remains the same)
@@ -90,13 +90,6 @@ export default function PaymentMethodsScreen() {
       {/* Stack.Screen options are now set dynamically via useEffect */}
       <SafeAreaView style={styles.container} edges={['bottom']}>
         <ScrollView showsVerticalScrollIndicator={false}>
-          <View style={styles.addButtonContainer}>
-            <Button
-              title="Add Payment Method"
-              onPress={handleAddPaymentMethod}
-              leftIcon={<Plus size={18} color={originalTheme.colors.common.white} />} // Explicitly white icon
-            />
-          </View>
 
           <View style={styles.sectionTitle}>
             <Text style={styles.sectionTitleText}>Your Payment Methods</Text>
@@ -159,6 +152,14 @@ export default function PaymentMethodsScreen() {
             </View>
           )}
 
+          <View style={styles.addButtonContainer}>
+            <Button
+              title="Add Payment Method"
+              onPress={handleAddPaymentMethod}
+              leftIcon={<Plus size={18} color={originalTheme.colors.common.white} />} // Explicitly white icon
+            />
+          </View>
+
           <View style={styles.securityNoteContainer}>
             <View style={styles.securityIcon}>
               <AlertCircle size={20} color={colors.primary} />
@@ -212,6 +213,7 @@ export default function PaymentMethodsScreen() {
 const dynamicStyles = (colors: ReturnType<typeof useTheme>['colors'], currentTheme: typeof originalTheme) => 
   StyleSheet.create({
     container: {
+      paddingTop:35,
       flex: 1,
       backgroundColor: colors.background,
     },
