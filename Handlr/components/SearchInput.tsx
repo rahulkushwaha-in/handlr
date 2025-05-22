@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, TextInput, StyleSheet, TouchableOpacity, TextInputProps } from 'react-native';
 import { Search, X } from 'lucide-react-native';
-import theme from '@/constants/theme';
+import originalTheme from '@/constants/theme'; // Renamed
+import { useTheme } from '../context/ThemeContext'; // Added
 
 interface SearchInputProps extends TextInputProps {
   value: string;
@@ -10,6 +11,10 @@ interface SearchInputProps extends TextInputProps {
   placeholder?: string;
 }
 
+// Define AppColorsType if it's not globally available or part of useTheme() already
+// For this component, direct usage of `colors` from useTheme() is fine.
+// type AppColorsType = ReturnType<typeof useTheme>['colors'];
+
 const SearchInput: React.FC<SearchInputProps> = ({
   value,
   onChangeText,
@@ -17,6 +22,9 @@ const SearchInput: React.FC<SearchInputProps> = ({
   placeholder = 'Search...',
   ...rest
 }) => {
+  const { colors } = useTheme(); // Accessed theme colors
+  const styles = dynamicStyles(colors, originalTheme); // Generate styles dynamically
+
   const handleClear = () => {
     onChangeText('');
     if (onClear) onClear();
@@ -24,45 +32,47 @@ const SearchInput: React.FC<SearchInputProps> = ({
 
   return (
     <View style={styles.container}>
-      <Search size={20} color={theme.colors.light.subtext} style={styles.searchIcon} />
+      <Search size={20} color={colors.subtext} style={styles.searchIcon} /> 
       <TextInput
         style={styles.input}
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
-        placeholderTextColor={theme.colors.light.placeholder}
+        placeholderTextColor={colors.placeholder} 
         {...rest}
       />
       {value.length > 0 && (
         <TouchableOpacity onPress={handleClear} style={styles.clearButton}>
-          <X size={16} color={theme.colors.light.subtext} />
+          <X size={16} color={colors.subtext} /> 
         </TouchableOpacity>
       )}
     </View>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: theme.colors.light.card,
-    borderRadius: theme.radius.m,
-    paddingHorizontal: theme.spacing.m,
-    height: 48,
-  },
-  searchIcon: {
-    marginRight: theme.spacing.s,
-  },
-  input: {
-    flex: 1,
-    height: '100%',
-    color: theme.colors.light.text,
-    ...theme.typography.body,
-  },
-  clearButton: {
-    padding: theme.spacing.xs,
-  },
-});
+// Converted styles to a function that accepts colors and originalTheme
+const dynamicStyles = (colors: ReturnType<typeof useTheme>['colors'], currentTheme: typeof originalTheme) => 
+  StyleSheet.create({
+    container: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.card, // Updated
+      borderRadius: currentTheme.radius.m,
+      paddingHorizontal: currentTheme.spacing.m,
+      height: 48,
+    },
+    searchIcon: {
+      marginRight: currentTheme.spacing.s,
+    },
+    input: {
+      flex: 1,
+      height: '100%',
+      color: colors.text, // Updated
+      ...currentTheme.typography.body,
+    },
+    clearButton: {
+      padding: currentTheme.spacing.xs,
+    },
+  });
 
 export default SearchInput;

@@ -1,7 +1,8 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, ViewStyle, View } from 'react-native';
 import { Category } from '@/types';
-import theme from '@/constants/theme';
+import originalTheme from '@/constants/theme'; // Renamed to avoid conflict
+import { useTheme } from '../context/ThemeContext'; // Added
 import { MapPin, Zap, Wrench, Hammer, PaintBucket, Flower, ShoppingBag, Truck } from 'lucide-react-native';
 
 interface CategoryCardProps {
@@ -12,9 +13,11 @@ interface CategoryCardProps {
 }
 
 // Map category icons to Lucide icons
+// This function doesn't need theme context directly as color is passed as an argument.
 const getCategoryIcon = (iconName: string, color: string, size: number) => {
+  // styles.icon here only refers to marginBottom, which is fine from originalTheme.
   switch (iconName) {
-    case 'spray-can':
+    case 'map-pin': // Explicitly map 'map-pin' if it's a possible iconName
       return <MapPin size={size} color={color} style={styles.icon} />;
     case 'wrench':
       return <Wrench size={size} color={color} style={styles.icon} />;
@@ -22,7 +25,7 @@ const getCategoryIcon = (iconName: string, color: string, size: number) => {
       return <Zap size={size} color={color} style={styles.icon} />;
     case 'hammer':
       return <Hammer size={size} color={color} style={styles.icon} />;
-    case 'paintbrush':
+    case 'paintbrush': 
       return <PaintBucket size={size} color={color} style={styles.icon} />;
     case 'flower':
       return <Flower size={size} color={color} style={styles.icon} />;
@@ -30,7 +33,8 @@ const getCategoryIcon = (iconName: string, color: string, size: number) => {
       return <ShoppingBag size={size} color={color} style={styles.icon} />;
     case 'truck':
       return <Truck size={size} color={color} style={styles.icon} />;
-    default:
+    default: // Defaulting to MapPin or a generic icon might be better
+      // console.warn("Unknown category icon:", iconName); // Optional: for debugging
       return <MapPin size={size} color={color} style={styles.icon} />;
   }
 };
@@ -41,11 +45,14 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
   style,
   selected = false,
 }) => {
+  const { colors } = useTheme(); // Accessed theme colors
+
   return (
     <TouchableOpacity
       style={[
         styles.container,
-        { backgroundColor: selected ? category.color : theme.colors.light.card },
+        // Use colors from context for the unselected card background
+        { backgroundColor: selected ? category.color : colors.card }, 
         style,
       ]}
       onPress={() => onPress(category)}
@@ -53,13 +60,17 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
     >
       {getCategoryIcon(
         category.icon,
-        selected ? theme.colors.common.white : category.color,
+        // Use colors from context for selected icon color (white)
+        // Unselected icon color remains category.color (data-driven)
+        selected ? colors.white : category.color, 
         24
       )}
       <Text
         style={[
           styles.name,
-          { color: selected ? theme.colors.common.white : theme.colors.light.text },
+          // Use colors from context for text color when unselected
+          // Selected text color remains white (or could be a contrast color to category.color if needed)
+          { color: selected ? colors.white : colors.text }, 
         ]}
         numberOfLines={1}
       >
@@ -69,21 +80,23 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
   );
 };
 
+// StyleSheet uses originalTheme for spacing, radius, and typography, which is fine.
+// No theme-dependent colors are defined here, so it doesn't need to be a dynamic function.
 const styles = StyleSheet.create({
   container: {
-    padding: theme.spacing.m,
-    borderRadius: theme.radius.m,
+    padding: originalTheme.spacing.m,
+    borderRadius: originalTheme.radius.m,
     alignItems: 'center',
     justifyContent: 'center',
     width: 100,
     height: 100,
-    margin: theme.spacing.xs,
+    margin: originalTheme.spacing.xs,
   },
   icon: {
-    marginBottom: theme.spacing.s,
+    marginBottom: originalTheme.spacing.s,
   },
   name: {
-    ...theme.typography.bodySmall,
+    ...originalTheme.typography.bodySmall,
     fontWeight: '500',
     textAlign: 'center',
   },

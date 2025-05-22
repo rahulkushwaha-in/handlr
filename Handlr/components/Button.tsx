@@ -2,13 +2,14 @@ import React from 'react';
 import { 
   TouchableOpacity, 
   Text, 
-  StyleSheet, 
+  StyleSheet, // StyleSheet is imported but not used directly for dynamic styles here
   ActivityIndicator,
   ViewStyle,
   TextStyle,
   TouchableOpacityProps
 } from 'react-native';
-import theme from '@/constants/theme';
+import originalTheme from '@/constants/theme'; // Renamed to avoid conflict
+import { useTheme } from '../context/ThemeContext'; // Added
 
 interface ButtonProps extends TouchableOpacityProps {
   title: string;
@@ -38,44 +39,46 @@ const Button: React.FC<ButtonProps> = ({
   rightIcon,
   ...rest
 }) => {
-  const getButtonStyles = () => {
+  const { colors } = useTheme(); // Accessed theme colors
+
+  const getButtonStyles = (): ViewStyle => { // Added return type for clarity
     const baseStyle: ViewStyle = {
-      borderRadius: theme.radius.m,
+      borderRadius: originalTheme.radius.m, // Uses originalTheme for radius
       justifyContent: 'center',
       alignItems: 'center',
       flexDirection: 'row',
     };
 
-    // Size styles
+    // Size styles - use originalTheme for spacing
     switch (size) {
       case 'small':
-        baseStyle.paddingVertical = theme.spacing.s;
-        baseStyle.paddingHorizontal = theme.spacing.m;
+        baseStyle.paddingVertical = originalTheme.spacing.s;
+        baseStyle.paddingHorizontal = originalTheme.spacing.m;
         break;
       case 'large':
-        baseStyle.paddingVertical = theme.spacing.l;
-        baseStyle.paddingHorizontal = theme.spacing.xl;
+        baseStyle.paddingVertical = originalTheme.spacing.l;
+        baseStyle.paddingHorizontal = originalTheme.spacing.xl;
         break;
       default: // medium
-        baseStyle.paddingVertical = theme.spacing.m;
-        baseStyle.paddingHorizontal = theme.spacing.l;
+        baseStyle.paddingVertical = originalTheme.spacing.m;
+        baseStyle.paddingHorizontal = originalTheme.spacing.l;
     }
 
-    // Variant styles
+    // Variant styles - use colors from context
     switch (variant) {
       case 'secondary':
-        baseStyle.backgroundColor = theme.colors.light.secondary;
+        baseStyle.backgroundColor = colors.secondary; // Updated
         break;
       case 'outline':
         baseStyle.backgroundColor = 'transparent';
         baseStyle.borderWidth = 1;
-        baseStyle.borderColor = theme.colors.light.primary;
+        baseStyle.borderColor = colors.primary; // Updated
         break;
       case 'ghost':
         baseStyle.backgroundColor = 'transparent';
         break;
       default: // primary
-        baseStyle.backgroundColor = theme.colors.light.primary;
+        baseStyle.backgroundColor = colors.primary; // Updated
     }
 
     // Width style
@@ -91,12 +94,12 @@ const Button: React.FC<ButtonProps> = ({
     return baseStyle;
   };
 
-  const getTextStyles = () => {
+  const getTextStyles = (): TextStyle => { // Added return type for clarity
     const baseStyle: TextStyle = {
-      fontWeight: '600',
+      fontWeight: '600', // Typography aspect from original design
     };
 
-    // Size styles
+    // Size styles - font sizes from original design
     switch (size) {
       case 'small':
         baseStyle.fontSize = 14;
@@ -108,14 +111,14 @@ const Button: React.FC<ButtonProps> = ({
         baseStyle.fontSize = 16;
     }
 
-    // Variant styles
+    // Variant styles - use colors from context
     switch (variant) {
       case 'outline':
       case 'ghost':
-        baseStyle.color = theme.colors.light.primary;
+        baseStyle.color = colors.primary; // Updated
         break;
       default: // primary, secondary
-        baseStyle.color = theme.colors.common.white;
+        baseStyle.color = colors.white; // Updated (assuming colors.white is from common)
     }
 
     return baseStyle;
@@ -125,7 +128,7 @@ const Button: React.FC<ButtonProps> = ({
     <TouchableOpacity
       onPress={onPress}
       disabled={disabled || loading}
-      style={[getButtonStyles(), style]}
+      style={[getButtonStyles(), style]} // style prop allows overrides
       activeOpacity={0.7}
       {...rest}
     >
@@ -133,13 +136,18 @@ const Button: React.FC<ButtonProps> = ({
         <ActivityIndicator 
           size="small" 
           color={variant === 'outline' || variant === 'ghost' 
-            ? theme.colors.light.primary 
-            : theme.colors.common.white} 
+            ? colors.primary // Updated
+            : colors.white} // Updated
         />
       ) : (
         <>
           {leftIcon && <>{leftIcon}</>}
-          <Text style={[getTextStyles(), textStyle, leftIcon && { marginLeft: theme.spacing.s }, rightIcon && { marginRight: theme.spacing.s }]}>
+          <Text style={[
+            getTextStyles(), 
+            textStyle, // textStyle prop allows overrides
+            leftIcon && { marginLeft: originalTheme.spacing.s }, // originalTheme for spacing
+            rightIcon && { marginRight: originalTheme.spacing.s } // originalTheme for spacing
+          ]}>
             {title}
           </Text>
           {rightIcon && <>{rightIcon}</>}

@@ -3,7 +3,8 @@ import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Filter } from 'lucide-react-native';
-import theme from '@/constants/theme';
+import originalTheme from '@/constants/theme'; // Renamed
+import { useTheme } from '../../context/ThemeContext'; // Added
 import { categories } from '@/mocks/categories';
 import { taskers } from '@/mocks/taskers';
 import { Category, Tasker } from '@/types';
@@ -12,6 +13,9 @@ import TaskerCard from '@/components/TaskerCard';
 import SearchInput from '@/components/SearchInput';
 
 export default function ExploreScreen() {
+  const { colors } = useTheme(); // Accessed theme colors
+  const styles = dynamicStyles(colors, originalTheme); // Generate styles dynamically
+
   const params = useLocalSearchParams();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(
@@ -26,14 +30,12 @@ export default function ExploreScreen() {
   const filterTaskers = () => {
     let filtered = [...taskers];
     
-    // Filter by category
     if (selectedCategory) {
       filtered = filtered.filter(tasker => 
         tasker.categories.includes(selectedCategory)
       );
     }
     
-    // Filter by search query
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(tasker => 
@@ -59,7 +61,7 @@ export default function ExploreScreen() {
       <View style={styles.header}>
         <Text style={styles.title}>Explore</Text>
         <TouchableOpacity style={styles.filterButton}>
-          <Filter size={20} color={theme.colors.light.text} />
+          <Filter size={20} color={colors.text} /> 
         </TouchableOpacity>
       </View>
 
@@ -117,67 +119,73 @@ export default function ExploreScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.light.background,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: theme.spacing.l,
-    paddingTop: theme.spacing.l,
-    paddingBottom: theme.spacing.m,
-  },
-  title: {
-    ...theme.typography.h2,
-  },
-  filterButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: theme.colors.light.card,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  searchContainer: {
-    paddingHorizontal: theme.spacing.l,
-    marginBottom: theme.spacing.l,
-  },
-  categoriesContainer: {
-    marginBottom: theme.spacing.l,
-  },
-  categoriesList: {
-    paddingHorizontal: theme.spacing.l,
-  },
-  resultContainer: {
-    paddingHorizontal: theme.spacing.l,
-    marginBottom: theme.spacing.m,
-  },
-  resultText: {
-    ...theme.typography.bodySmall,
-    color: theme.colors.light.subtext,
-  },
-  taskersList: {
-    paddingHorizontal: theme.spacing.l,
-    paddingBottom: theme.spacing.xl,
-  },
-  taskerCardContainer: {
-    marginBottom: theme.spacing.m,
-  },
-  emptyContainer: {
-    alignItems: 'center',
-    padding: theme.spacing.xl,
-    marginTop: theme.spacing.xl,
-  },
-  emptyTitle: {
-    ...theme.typography.h3,
-    marginBottom: theme.spacing.s,
-  },
-  emptyText: {
-    ...theme.typography.body,
-    color: theme.colors.light.subtext,
-    textAlign: 'center',
-  },
-});
+// Converted styles to a function that accepts colors and originalTheme
+const dynamicStyles = (colors: ReturnType<typeof useTheme>['colors'], currentTheme: typeof originalTheme) => 
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background, // Updated
+    },
+    header: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingHorizontal: currentTheme.spacing.l,
+      paddingTop: currentTheme.spacing.l,
+      paddingBottom: currentTheme.spacing.m,
+    },
+    title: {
+      ...currentTheme.typography.h2, 
+      color: colors.text, // Added color
+    },
+    filterButton: {
+      width: 40,
+      height: 40,
+      borderRadius: 20, 
+      backgroundColor: colors.card, // Updated
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    searchContainer: {
+      paddingHorizontal: currentTheme.spacing.l,
+      marginBottom: currentTheme.spacing.l,
+    },
+    categoriesContainer: {
+      marginBottom: currentTheme.spacing.l,
+    },
+    categoriesList: {
+      paddingHorizontal: currentTheme.spacing.l,
+    },
+    resultContainer: {
+      paddingHorizontal: currentTheme.spacing.l,
+      marginBottom: currentTheme.spacing.m,
+    },
+    resultText: {
+      ...currentTheme.typography.bodySmall,
+      color: colors.subtext, // Updated
+    },
+    taskersList: {
+      paddingHorizontal: currentTheme.spacing.l,
+      paddingBottom: currentTheme.spacing.xl,
+    },
+    taskerCardContainer: { 
+      marginBottom: currentTheme.spacing.m,
+    },
+    emptyContainer: {
+      alignItems: 'center',
+      padding: currentTheme.spacing.xl,
+      marginTop: currentTheme.spacing.xl,
+    },
+    emptyTitle: {
+      ...currentTheme.typography.h3,
+      color: colors.text, // Added color
+      marginBottom: currentTheme.spacing.s,
+    },
+    emptyText: {
+      ...currentTheme.typography.body,
+      color: colors.subtext, // Updated
+      textAlign: 'center',
+    },
+  });
+
+export default ExploreScreen;
