@@ -13,5 +13,5 @@
     "**/*.tsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts"
-  ]
+, "app/(tabs)/_layout.jsx", "app/task/create.jsx", "app/(tabs)/index.jsx", "app/(tabs)/chats.jsx", "app/(tabs)/categories.jsx", "app/(tabs)/explore.jsx", "app/(tabs)/profile.jsx", "components/SearchInput.jsx", "app/tasker/[id].jsx", "app/task/[id].jsx", "components/TaskerCard.jsx"  ]
 }

@@ -35,3 +35,11 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 .vercel
+# React Native
+android/.gradle
+android/app/build
+android/build
+ios/Pods
+ios/build
+*.keystore
+*.jks

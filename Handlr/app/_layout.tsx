@@ -32,6 +32,11 @@ function AppContent() {
             <Stack.Screen name="task/create" options={{ headerShown: true, title: 'Create Task' }} />
             <Stack.Screen name="task/[id]" options={{ headerShown: true, title: 'Task Details' }} />
             <Stack.Screen name="chat/[id]" options={{ headerShown: true, title: 'Chat' }} />
+            {/* <Stack.Screen name="task/selectCategory" options={{ headerShown: true, title: 'Chat' }} /> */}
+            <Stack.Screen name="task/taskConfirm" options={{ title: 'Task Confirm' }} />
+            <Stack.Screen name="task/bookingConfirm" options={{ title: 'Confirm Booking' }} />
+            <Stack.Screen name="task/findingTasker" options={{ title: 'Finding Tasker' }} />
+            
           </>
         )}
       </Stack>

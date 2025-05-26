@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'; // Added useEffect for header options
+import React, { useState, useEffect,useRef  } from 'react'; // Added useEffect for header options
 import { 
   View, 
   Text, 
@@ -10,7 +10,8 @@ import {
   KeyboardAvoidingView, 
   Platform,
   Alert,
-  Dimensions // For screenWidth fallback
+  Dimensions, // For screenWidth fallback
+  Keyboard
 } from 'react-native';
 import { router, Stack, useNavigation } from 'expo-router'; // Added useNavigation
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -35,6 +36,36 @@ export default function EditProfileScreen() {
   const [address, setAddress] = useState(user?.location?.address || '');
   const [avatar, setAvatar] = useState(user?.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80');
   const [isLoading, setIsLoading] = useState(false);
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const scrollViewRef = useRef<ScrollView>(null); // Add this ref
+
+// Suggested code may be subject to a license. Learn more: ~LicenseLog:2426310761.
+// Suggested code may be subject to a license. Learn more: ~LicenseLog:3381306389.
+useEffect(() => {
+  const keyboardDidShowListener = Keyboard.addListener(
+    'keyboardDidShow',
+    (e) => {
+      setKeyboardVisible(true);
+      setKeyboardHeight(e.endCoordinates.height);
+      // Scroll to bottom when keyboard appears
+      scrollViewRef.current?.scrollToEnd({ animated: true });
+    }
+  );
+  
+  const keyboardDidHideListener = Keyboard.addListener(
+    'keyboardDidHide',
+    () => {
+      setKeyboardVisible(false);
+      setKeyboardHeight(0);
+    }
+  );
+
+  return () => {
+    keyboardDidShowListener.remove();
+    keyboardDidHideListener.remove();
+  };
+}, []);
 
   // Dynamically set header options based on theme
   useEffect(() => {
@@ -101,8 +132,13 @@ export default function EditProfileScreen() {
   };
 
   return (
-          <View style={styles.container}>
-          <ScrollView showsVerticalScrollIndicator={false}>
+          // <View style={styles.container}>
+            <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 20 : 0}
+      >
+          <ScrollView showsVerticalScrollIndicator={false} ref={scrollViewRef}>
             <View style={styles.avatarContainer}>
               <Image source={{ uri: avatar }} style={styles.avatar} />
               <TouchableOpacity style={styles.cameraButton} onPress={pickImage}>
@@ -189,7 +225,8 @@ export default function EditProfileScreen() {
               />
             </View>
           </ScrollView>
-          </View>
+          {/* </View> */}
+          </KeyboardAvoidingView>
 
   );
 }

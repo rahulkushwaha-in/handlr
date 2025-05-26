@@ -14,10 +14,10 @@ import {
 import { useLocalSearchParams, router, Stack } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Send, Phone, Video, ChevronLeft } from 'lucide-react-native';
-import theme from '@/constants/theme';
+import originalTheme from '@/constants/theme';
+import { useTheme } from '@/context/ThemeContext';
 import { taskers } from '@/mocks/taskers';
 import { useAuthStore } from '@/store/authStore';
-import { Tasker } from '@/types';
 
 // Define message type
 interface Message {
@@ -83,6 +83,8 @@ const mockMessages: Message[] = [
 
 export default function ChatScreen() {
   const { id } = useLocalSearchParams();
+  const { colors } = useTheme();
+  const styles = dynamicStyles(colors, originalTheme);
   const [tasker, setTasker] = useState<Tasker | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
@@ -160,7 +162,7 @@ export default function ChatScreen() {
   if (!tasker) {
     return (
       <View style={styles.loadingContainer}>
-        <Text>Loading...</Text>
+        <Text style={styles.loadingText}>Loading...</Text>
       </View>
     );
   }
@@ -183,25 +185,31 @@ export default function ChatScreen() {
               style={styles.headerButton}
               onPress={() => router.back()}
             >
-              <ChevronLeft size={24} color={theme.colors.light.text} />
+              <ChevronLeft size={24} color={colors.text} />
             </TouchableOpacity>
           ),
           headerRight: () => (
             <View style={styles.headerActions}>
               <TouchableOpacity style={styles.headerButton}>
-                <Phone size={20} color={theme.colors.light.text} />
+                <Phone size={20} color={colors.text} />
               </TouchableOpacity>
               <TouchableOpacity style={styles.headerButton}>
-                <Video size={20} color={theme.colors.light.text} />
+                <Video size={20} color={colors.text} />
               </TouchableOpacity>
             </View>
           ),
+          headerStyle: {
+            backgroundColor: colors.background,
+          },
+          headerTitleStyle: {
+            color: colors.text,
+          },
         }} 
       />
       <KeyboardAvoidingView
         style={styles.container}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 20 : 0}
       >
         <FlatList
           ref={flatListRef}
@@ -243,6 +251,7 @@ export default function ChatScreen() {
           <TextInput
             style={styles.input}
             placeholder="Type a message..."
+            placeholderTextColor={colors.subtext}
             value={newMessage}
             onChangeText={setNewMessage}
             multiline
@@ -256,7 +265,7 @@ export default function ChatScreen() {
             onPress={sendMessage}
             disabled={!newMessage.trim()}
           >
-            <Send size={20} color={theme.colors.common.white} />
+            <Send size={20} color={originalTheme.colors.common.white} />
           </TouchableOpacity>
         </SafeAreaView>
       </KeyboardAvoidingView>
@@ -264,110 +273,118 @@ export default function ChatScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.light.background,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  headerTitle: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  headerAvatar: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    marginRight: theme.spacing.s,
-  },
-  headerName: {
-    ...theme.typography.body,
-    fontWeight: '600',
-  },
-  headerStatus: {
-    ...theme.typography.caption,
-    color: theme.colors.light.success,
-  },
-  headerButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginHorizontal: 4,
-  },
-  headerActions: {
-    flexDirection: 'row',
-  },
-  messagesList: {
-    padding: theme.spacing.m,
-    paddingBottom: theme.spacing.xl,
-  },
-  messageContainer: {
-    marginBottom: theme.spacing.m,
-    maxWidth: '80%',
-  },
-  userMessageContainer: {
-    alignSelf: 'flex-end',
-  },
-  otherMessageContainer: {
-    alignSelf: 'flex-start',
-  },
-  messageBubble: {
-    borderRadius: theme.radius.l,
-    padding: theme.spacing.m,
-  },
-  userMessageBubble: {
-    backgroundColor: theme.colors.light.primary,
-  },
-  otherMessageBubble: {
-    backgroundColor: theme.colors.light.card,
-  },
-  messageText: {
-    ...theme.typography.body,
-  },
-  userMessageText: {
-    color: theme.colors.common.white,
-  },
-  otherMessageText: {
-    color: theme.colors.light.text,
-  },
-  messageTime: {
-    ...theme.typography.caption,
-    color: theme.colors.light.subtext,
-    marginTop: 4,
-    alignSelf: 'flex-end',
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    padding: theme.spacing.m,
-    borderTopWidth: 1,
-    borderTopColor: theme.colors.light.border,
-    backgroundColor: theme.colors.light.background,
-  },
-  input: {
-    flex: 1,
-    backgroundColor: theme.colors.light.card,
-    borderRadius: theme.radius.l,
-    paddingHorizontal: theme.spacing.m,
-    paddingVertical: theme.spacing.s,
-    maxHeight: 100,
-    ...theme.typography.body,
-  },
-  sendButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: theme.colors.light.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginLeft: theme.spacing.m,
-  },
-  sendButtonDisabled: {
-    backgroundColor: theme.colors.light.inactive,
-  },
-});
+const dynamicStyles = (colors: ReturnType<typeof useTheme>['colors'], currentTheme: typeof originalTheme) => 
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    loadingContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: colors.background,
+    },
+    loadingText: {
+      color: colors.text,
+      ...currentTheme.typography.body,
+    },
+    headerTitle: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    headerAvatar: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      marginRight: currentTheme.spacing.s,
+    },
+    headerName: {
+      ...currentTheme.typography.body,
+      fontWeight: '600',
+      color: colors.text,
+    },
+    headerStatus: {
+      ...currentTheme.typography.caption,
+      color: colors.success,
+    },
+    headerButton: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginHorizontal: 4,
+    },
+    headerActions: {
+      flexDirection: 'row',
+    },
+    messagesList: {
+      padding: currentTheme.spacing.m,
+      paddingBottom: currentTheme.spacing.xl,
+    },
+    messageContainer: {
+      marginBottom: currentTheme.spacing.m,
+      maxWidth: '80%',
+    },
+    userMessageContainer: {
+      alignSelf: 'flex-end',
+    },
+    otherMessageContainer: {
+      alignSelf: 'flex-start',
+    },
+    messageBubble: {
+      borderRadius: currentTheme.radius.l,
+      padding: currentTheme.spacing.m,
+    },
+    userMessageBubble: {
+      backgroundColor: colors.primary,
+    },
+    otherMessageBubble: {
+      backgroundColor: colors.card,
+    },
+    messageText: {
+      ...currentTheme.typography.body,
+    },
+    userMessageText: {
+      color: currentTheme.colors.common.white,
+    },
+    otherMessageText: {
+      color: colors.text,
+    },
+    messageTime: {
+      ...currentTheme.typography.caption,
+      color: colors.subtext,
+      marginTop: 4,
+      alignSelf: 'flex-end',
+    },
+    inputContainer: {
+      flexDirection: 'row',
+      padding: currentTheme.spacing.m,
+      borderTopWidth: 1,
+      borderTopColor: colors.border,
+      backgroundColor: colors.background,
+    },
+    input: {
+      flex: 1,
+      backgroundColor: colors.card,
+      borderRadius: currentTheme.radius.l,
+      paddingHorizontal: currentTheme.spacing.m,
+      paddingVertical: currentTheme.spacing.s,
+      maxHeight: 100,
+      ...currentTheme.typography.body,
+      color: colors.text,
+    },
+    sendButton: {
+      width: 44,
+      height: 44,
+      borderRadius: 22,
+      backgroundColor: colors.primary,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginLeft: currentTheme.spacing.m,
+    },
+    sendButtonDisabled: {
+      backgroundColor: colors.inactive,
+    },
+  });
